@@ -1,0 +1,839 @@
+{
+    "id": "AARS1",
+    "source": "NCBI",
+    "species": "Homo_sapiens",
+    "strand": "-",
+    "probes": {
+        "Oligoset 1": [
+            {
+                "id": "AARS1::12425",
+                "start": 70270263,
+                "end": 70270290,
+                "transcript_ids": [
+                    "NM_001605.3",
+                    "XM_047433666.1"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "57.14",
+                    "TmNN_oligo": "67.46",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70270290",
+                    "exon_number": "6, 6",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "100",
+                    "length_oligo": "28",
+                    "length_selfcomplement_oligo": "4",
+                    "oligo": "ACAGATACCAGTCGTTCCAGGCCCATCC",
+                    "oligo_id": "AARS1::12425",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70270263",
+                    "strand": "-",
+                    "target": "GGATGGGCCTGGAACGACTGGTATCTGT",
+                    "transcript_id": "NM_001605.3, XM_047433666.1",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "6, 6"
+                }
+            },
+            {
+                "id": "AARS1::7515",
+                "start": 70252837,
+                "end": 70252864,
+                "transcript_ids": [
+                    "NM_001605.3"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "53.57",
+                    "TmNN_oligo": "65",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70252864",
+                    "exon_number": "21",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "50",
+                    "length_oligo": "28",
+                    "length_selfcomplement_oligo": "3",
+                    "oligo": "CTTTACCGTCCATCAAGCCTGACACCTG",
+                    "oligo_id": "AARS1::7515",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70252837",
+                    "strand": "-",
+                    "target": "CAGGTGTCAGGCTTGATGGACGGTAAAG",
+                    "transcript_id": "NM_001605.3",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "21"
+                }
+            },
+            {
+                "id": "AARS1::9155",
+                "start": 70252358,
+                "end": 70252387,
+                "transcript_ids": [
+                    "NM_001605.3"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "50",
+                    "TmNN_oligo": "65.32",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70252387",
+                    "exon_number": "21",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "50",
+                    "length_oligo": "30",
+                    "length_selfcomplement_oligo": "4",
+                    "oligo": "GGGAAGAGGGATAGAGATCATGCGGCATTA",
+                    "oligo_id": "AARS1::9155",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70252358",
+                    "strand": "-",
+                    "target": "TAATGCCGCATGATCTCTATCCCTCTTCCC",
+                    "transcript_id": "NM_001605.3",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "21"
+                }
+            }
+        ],
+        "Oligoset 2": [
+            {
+                "id": "AARS1::12425",
+                "start": 70270263,
+                "end": 70270290,
+                "transcript_ids": [
+                    "NM_001605.3",
+                    "XM_047433666.1"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "57.14",
+                    "TmNN_oligo": "67.46",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70270290",
+                    "exon_number": "6, 6",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "100",
+                    "length_oligo": "28",
+                    "length_selfcomplement_oligo": "4",
+                    "oligo": "ACAGATACCAGTCGTTCCAGGCCCATCC",
+                    "oligo_id": "AARS1::12425",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70270263",
+                    "strand": "-",
+                    "target": "GGATGGGCCTGGAACGACTGGTATCTGT",
+                    "transcript_id": "NM_001605.3, XM_047433666.1",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "6, 6"
+                }
+            },
+            {
+                "id": "AARS1::7518",
+                "start": 70252834,
+                "end": 70252861,
+                "transcript_ids": [
+                    "NM_001605.3"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "53.57",
+                    "TmNN_oligo": "65.17",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70252861",
+                    "exon_number": "21",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "50",
+                    "length_oligo": "28",
+                    "length_selfcomplement_oligo": "3",
+                    "oligo": "CACCTTTACCGTCCATCAAGCCTGACAC",
+                    "oligo_id": "AARS1::7518",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70252834",
+                    "strand": "-",
+                    "target": "GTGTCAGGCTTGATGGACGGTAAAGGTG",
+                    "transcript_id": "NM_001605.3",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "21"
+                }
+            },
+            {
+                "id": "AARS1::9155",
+                "start": 70252358,
+                "end": 70252387,
+                "transcript_ids": [
+                    "NM_001605.3"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "50",
+                    "TmNN_oligo": "65.32",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70252387",
+                    "exon_number": "21",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "50",
+                    "length_oligo": "30",
+                    "length_selfcomplement_oligo": "4",
+                    "oligo": "GGGAAGAGGGATAGAGATCATGCGGCATTA",
+                    "oligo_id": "AARS1::9155",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70252358",
+                    "strand": "-",
+                    "target": "TAATGCCGCATGATCTCTATCCCTCTTCCC",
+                    "transcript_id": "NM_001605.3",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "21"
+                }
+            }
+        ],
+        "Oligoset 3": [
+            {
+                "id": "AARS1::12425",
+                "start": 70270263,
+                "end": 70270290,
+                "transcript_ids": [
+                    "NM_001605.3",
+                    "XM_047433666.1"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "57.14",
+                    "TmNN_oligo": "67.46",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70270290",
+                    "exon_number": "6, 6",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "100",
+                    "length_oligo": "28",
+                    "length_selfcomplement_oligo": "4",
+                    "oligo": "ACAGATACCAGTCGTTCCAGGCCCATCC",
+                    "oligo_id": "AARS1::12425",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70270263",
+                    "strand": "-",
+                    "target": "GGATGGGCCTGGAACGACTGGTATCTGT",
+                    "transcript_id": "NM_001605.3, XM_047433666.1",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "6, 6"
+                }
+            },
+            {
+                "id": "AARS1::8097",
+                "start": 70252836,
+                "end": 70252864,
+                "transcript_ids": [
+                    "NM_001605.3"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "55.17",
+                    "TmNN_oligo": "66.55",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70252864",
+                    "exon_number": "21",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "50",
+                    "length_oligo": "29",
+                    "length_selfcomplement_oligo": "3",
+                    "oligo": "CCTTTACCGTCCATCAAGCCTGACACCTG",
+                    "oligo_id": "AARS1::8097",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70252836",
+                    "strand": "-",
+                    "target": "CAGGTGTCAGGCTTGATGGACGGTAAAGG",
+                    "transcript_id": "NM_001605.3",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "21"
+                }
+            },
+            {
+                "id": "AARS1::9155",
+                "start": 70252358,
+                "end": 70252387,
+                "transcript_ids": [
+                    "NM_001605.3"
+                ],
+                "locations": null,
+                "metadata": {
+                    "GC_content_oligo": "50",
+                    "TmNN_oligo": "65.32",
+                    "annotation_release": "GCF_000001405.40_GRCh38.p14",
+                    "chromosome": "NC_000016.10",
+                    "end": "70252387",
+                    "exon_number": "21",
+                    "gene_id": "AARS1",
+                    "genome_assembly": "GRCh38.p14",
+                    "isoform_consensus": "50",
+                    "length_oligo": "30",
+                    "length_selfcomplement_oligo": "4",
+                    "oligo": "GGGAAGAGGGATAGAGATCATGCGGCATTA",
+                    "oligo_id": "AARS1::9155",
+                    "regiontype": "exon",
+                    "source": "NCBI",
+                    "species": "Homo_sapiens",
+                    "start": "70252358",
+                    "strand": "-",
+                    "target": "TAATGCCGCATGATCTCTATCCCTCTTCCC",
+                    "transcript_id": "NM_001605.3",
+                    "pipeline": "oligoseq",
+                    "exon_numbers": "21"
+                }
+            }
+        ]
+    },
+    "regions": {
+        "NM_001605.3": [
+            {
+                "start": 70289421,
+                "end": 70289506,
+                "type": "exon",
+                "description": "exon_number: 1 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70282785,
+                "end": 70289420,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70282620,
+                "end": 70282784,
+                "type": "exon",
+                "description": "exon_number: 2 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70277155,
+                "end": 70282619,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70276966,
+                "end": 70277154,
+                "type": "exon",
+                "description": "exon_number: 3 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70276632,
+                "end": 70276965,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70276486,
+                "end": 70276631,
+                "type": "exon",
+                "description": "exon_number: 4 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70271973,
+                "end": 70276485,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70271781,
+                "end": 70271972,
+                "type": "exon",
+                "description": "exon_number: 5 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70270341,
+                "end": 70271780,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70270196,
+                "end": 70270340,
+                "type": "exon",
+                "description": "exon_number: 6 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70269764,
+                "end": 70270195,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70269618,
+                "end": 70269763,
+                "type": "exon",
+                "description": "exon_number: 7 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70268380,
+                "end": 70269617,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70268271,
+                "end": 70268379,
+                "type": "exon",
+                "description": "exon_number: 8 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70267810,
+                "end": 70268270,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70267659,
+                "end": 70267809,
+                "type": "exon",
+                "description": "exon_number: 9 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70265663,
+                "end": 70267658,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70265538,
+                "end": 70265662,
+                "type": "exon",
+                "description": "exon_number: 10 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70265103,
+                "end": 70265537,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70264958,
+                "end": 70265102,
+                "type": "exon",
+                "description": "exon_number: 11 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70262525,
+                "end": 70264957,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70262346,
+                "end": 70262524,
+                "type": "exon",
+                "description": "exon_number: 12 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70261158,
+                "end": 70262345,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70261044,
+                "end": 70261157,
+                "type": "exon",
+                "description": "exon_number: 13 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70259187,
+                "end": 70261043,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70258980,
+                "end": 70259186,
+                "type": "exon",
+                "description": "exon_number: 14 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70258218,
+                "end": 70258979,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70258033,
+                "end": 70258217,
+                "type": "exon",
+                "description": "exon_number: 15 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70255837,
+                "end": 70258032,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70255728,
+                "end": 70255836,
+                "type": "exon",
+                "description": "exon_number: 16 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70254735,
+                "end": 70255727,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70254621,
+                "end": 70254734,
+                "type": "exon",
+                "description": "exon_number: 17 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70254039,
+                "end": 70254620,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70253919,
+                "end": 70254038,
+                "type": "exon",
+                "description": "exon_number: 18 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70253801,
+                "end": 70253918,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70253714,
+                "end": 70253800,
+                "type": "exon",
+                "description": "exon_number: 19 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70253382,
+                "end": 70253713,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70253268,
+                "end": 70253381,
+                "type": "exon",
+                "description": "exon_number: 20 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70252907,
+                "end": 70253267,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70252298,
+                "end": 70252906,
+                "type": "exon",
+                "description": "exon_number: 21 | chromosome: NC_000016.10 | strand: -"
+            }
+        ],
+        "XM_047433666.1": [
+            {
+                "start": 70289421,
+                "end": 70289506,
+                "type": "exon",
+                "description": "exon_number: 1 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70282785,
+                "end": 70289420,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70282620,
+                "end": 70282784,
+                "type": "exon",
+                "description": "exon_number: 2 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70277155,
+                "end": 70282619,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70276966,
+                "end": 70277154,
+                "type": "exon",
+                "description": "exon_number: 3 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70276632,
+                "end": 70276965,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70276486,
+                "end": 70276631,
+                "type": "exon",
+                "description": "exon_number: 4 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70271973,
+                "end": 70276485,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70271781,
+                "end": 70271972,
+                "type": "exon",
+                "description": "exon_number: 5 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70270341,
+                "end": 70271780,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70270196,
+                "end": 70270340,
+                "type": "exon",
+                "description": "exon_number: 6 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70269764,
+                "end": 70270195,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70269618,
+                "end": 70269763,
+                "type": "exon",
+                "description": "exon_number: 7 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70268380,
+                "end": 70269617,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70268271,
+                "end": 70268379,
+                "type": "exon",
+                "description": "exon_number: 8 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70267810,
+                "end": 70268270,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70267659,
+                "end": 70267809,
+                "type": "exon",
+                "description": "exon_number: 9 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70265663,
+                "end": 70267658,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70265538,
+                "end": 70265662,
+                "type": "exon",
+                "description": "exon_number: 10 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70265103,
+                "end": 70265537,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70264958,
+                "end": 70265102,
+                "type": "exon",
+                "description": "exon_number: 11 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70262525,
+                "end": 70264957,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70262346,
+                "end": 70262524,
+                "type": "exon",
+                "description": "exon_number: 12 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70261158,
+                "end": 70262345,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70261044,
+                "end": 70261157,
+                "type": "exon",
+                "description": "exon_number: 13 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70259187,
+                "end": 70261043,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70258980,
+                "end": 70259186,
+                "type": "exon",
+                "description": "exon_number: 14 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70255837,
+                "end": 70258979,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70255728,
+                "end": 70255836,
+                "type": "exon",
+                "description": "exon_number: 15 | chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70254735,
+                "end": 70255727,
+                "type": "intron",
+                "description": "chromosome: NC_000016.10 | strand: -"
+            },
+            {
+                "start": 70254621,
+                "end": 70254734,
+                "type": "exon",
+                "description": "exon_number: 16 | chromosome: NC_000016.10 | strand: -"
+            }
+        ]
+    },
+    "sequences": [
+        {
+            "start": 70252298,
+            "sequence": "GTCCTCGGTGTCGTAAATAAGATGTCTGCGGTTTCCGACAGTTTTCTCGGTCGGGGATAACCCTTCTCCCTATCTCTAGTACGCCGTAATTCATAACGTGCACCAGGAAAATAAGAGACGTCGTTTTTGCTAAGGATGAACGACTGCGCCTTTCGAGTCCAGACCTCTCGGCAATAGATATCTACGCTCGCACTGCTAGTTGTCGTTACGCCCCAATCACCAAGATCTGGCTACCGTGACTGCACCTCCCGAGTCCCGTCTTTAAATTCCCCGTGACTCTGTATCCTGACGAGGGTTCACACAAGGTCAATGACGACCCAATCCTCCCCGAGAAATTTCCAGGGTTCTAAGTTTACAAGAACATCGTCTACTTCTCGAGAACCGACCTGCCTACCTAGGTCACCCtcggaggaggaaggggtgagtCAAGAAATGTAGGGGCTCCGCGTCGACCCGCTTCCTTCACCGGTCGACGTCGCGGAGGACGTCCGTCGGTTGCAAGAACGGACACCGGACACGTCTGTGTAGGAACGGTGGTGGAAATGGCAGGTAGTTCGGACTGTGGACGACGTGGGTGAGCGACCGAAAATTCGGGGCTAACCGACGTAA"
+        },
+        {
+            "start": 70253268,
+            "sequence": "GACCCCTTGAACTGTGTCCGTGCACTAGAACGGTCGGAGTAACAGGTGGCACTTCTCGTACCGTCTTCAGACTCCCCTCACGTAGAACTTCTCGAAGTTCCGAAGTAAGTCCCG"
+        },
+        {
+            "start": 70253714,
+            "sequence": "GAACCGACTCCGCGGCGAGAGGTAGAGGTCCTACTGTTCTCCGACCAACCCCAACGACAGCTACTTGACGAAGCAGAAGAGATTGTG"
+        },
+        {
+            "start": 70253919,
+            "sequence": "AGCAAAGACCTGTAGCCGAAACGACCGAGCCAGGTTCAGTAGGTACTGGAAGAAATCCCTAAACTCTCAGAGGGCGTTAAGTAGGAAGACGGTGACCCCCTACTGACGTCACCGGTCCCG"
+        },
+        {
+            "start": 70254621,
+            "sequence": "GAGAGGTTCCAGTCGCTAGAGGGAGACGTGTAGGAACAAACCTCGTCAGACTCGGAAGTGAAACCGAAGGTACTGTCTCTCTGTAAAGAAGTTCGAGAGACGAAAGGACTCCCG"
+        },
+        {
+            "start": 70255728,
+            "sequence": "GAAGACCCGGAGCCGTGGACACTGTCGGTGTTAGGAGGCCTATGGGAACCGTTACCGAAGAAGGCAGTGCTAGTGTTTTCGAGGACGTACTGAGCTCAAGGCGTCCACG"
+        },
+        {
+            "start": 70258033,
+            "sequence": "CAAGGGGGTGTCTTGAGTTGTCTTCAGTCCCTCGGTCGTCCGGGTCTCCCCAGTAGGTCGTTGAGCCTGTGGCCCTGGGGTTACCTCTGCTGAGCGTGTCCCAGTCCTATCCAGAGTAGTTTGTGTCGGGCATCCGGGACCTACCGAAAGCGACGACGGTCCCCCGTTAGGACCCATATCTGCCG"
+        },
+        {
+            "start": 70258980,
+            "sequence": "GAACCGACGGAGTTAGTAGAGTAATCGTTAGAGAAGTCGGAAGAACTAGACAACCCACCTGTACCGAGGGAACCGTCATTTCAGTTTAGACTCCGCCAGTCCTCGTTGGTTACTCGGAAAGACCAGTCGAAGGGGTTCGTGACTCGCGTCCCGCTTCAAGTCTTACACGCATCGACACACCAACGAGTACTACCCAGAAGCAGCCCC"
+        },
+        {
+            "start": 70261044,
+            "sequence": "GAGTAGTTATTTGTCGGTCTGGACTAGGGGGTGAAAGTCCAGTGGCATCTACCAAGGTTACACATCGTGTATGGGAGGAGCCTGGACTCGTAAGAAGTGACATTTGAGACAAAA"
+        },
+        {
+            "start": 70262346,
+            "sequence": "TAGAAGTGACGACAGTAGGTGGAAGTGGTCCATCGGAAGCAGTATCTAGACCGGAGGAACGAGTCGTATCTTTGTCCAGAACAGGTCGTGGTGAGGTGTGAGGACCGGACACCTGTGGAGAAGGTGCTTGTAGAAGAGGGACGCGTCTCGGTAGTGGCATCGGTGACACAAGAGTTTAT"
+        },
+        {
+            "start": 70264958,
+            "sequence": "GTATCGATGGTGACCTCAGGTTTACCATTAACATGAAACCCCTTAGTAGACACTGGAGGTCTGGGGCACGGGCCTCGAGAAGCTATCGCATTTACAGGTCGTATTACTCCAGAAGGGGTGGTCGAGGGAACGGGACACTAAAGTC"
+        },
+        {
+            "start": 70265538,
+            "sequence": "GACCCGGTCAAAGGAGAGGAGAAGTTTCGGTAGGTACAGATGGTGGTCCGGGAAGAGAAGTCGTTAGTCAGGTCAGTCTAGGTGACCTTTGGGTATCCACAGTATCTCCTCGGTTCGTCACAGAG"
+        },
+        {
+            "start": 70267659,
+            "sequence": "GCCCTtaccagaacgacagagggtccgagacTTAAAAGGACAGGTCCTACGCTGCGGGAGACGACTCTCAGAACTCTTTGACGTGGAGAAGAAGTAATTACTACAGGAAGTGGTACAGACCCAGGAAGAAGTCGAGTCCTTTACGTAGAGG"
+        },
+        {
+            "start": 70268271,
+            "sequence": "GTCCCTGACCTGCTGTTGTAGGTGATTGCATCGTTTCTTCGGGGACGACCGTAACTCGAAAAGTACCCGCATAGCCTGTCGAGCCGCCTCTTAGGCAGAGTTGTGTATA"
+        },
+        {
+            "start": 70269618,
+            "sequence": "GGTGCGGGACACAACAGTCCGGCCGGTGGTAGTCGGTCACGGTGTCACTACCAGGCTCGCACCAGTCGGTCGTGGGCCATCCGGTACAGTTAGGGTAGCCGTAGGAGTCGTGGTTGAAAGGGTCACATACCAGCCCGTGGACACGG"
+        },
+        {
+            "start": 70270196,
+            "sequence": "GAAGACTTACCGAAGTTTCATTCCCTGTTTTTCCAGTCACAGTATCAACCTGTAGAATAAGACGTCGTGTCTATGGTCAGCAAGGTCCGGGTAGGGACACAGTTACGAAAAGAACCCTTCTCCAAAGTCTTACGGTAGTCGAAGG"
+        },
+        {
+            "start": 70271781,
+            "sequence": "GACAATATGACCTACTTGTGTTCCAAGGTCTAGAGGTCGTGTAATCCCAGCAGGACCAACTGTTCTACACGCCGCAGGGCTGGTGGTTAGGCCAGCATCACCTAGAGTGACGTTCCTGGTGTCCCCGGGCACAGTGGGTAGAGGGTCTTCAATAGGAAGTACAACGGACCCTCCTAAAACCACAGTAGGTCG"
+        },
+        {
+            "start": 70276486,
+            "sequence": "GGGTTTAAAACGGTCTAGACAAACGTAAGGTCTAGACGAAGATTCGGTCGACGAAGTAGGGGCGGTTTCATTCATTGTATTTCAGAAAGTTACCCTTACGGTTTGAGAACCCACTCCTCAAGGTCTCGGTAGAATGTACGGTTAAG"
+        },
+        {
+            "start": 70276966,
+            "sequence": "GAATTTCATTAGAGGTTTTCTGGTTCTCGGGTCGTAGAGCTTCTTCCACACTACTATCTGTAGGAACGGGTGTAGCAGGTCCAGTAATACAAACGGGGGTCGGGCCTACGTGAAGACCCATAACCGTCGAGACGAGTCGAAACGGTACCCCACTCTACCCAGTTAACACAAGTCCTTTTACCCAAATTT"
+        },
+        {
+            "start": 70282620,
+            "sequence": "GACCAAGTACGGACGTAACCGTTTCTCGTTTCACCCCAGTAGGTTACCCTACCACCGTCTGCTCACTTGTATGCATACGAGCAAGGAGAACTTCTTTAGATATTTAGCGACGGCCTAAAGTGAACGACAATCTCATCTCAGGTAGAACTTTCAGTGGGGTTTCTt"
+        },
+        {
+            "start": 70289421,
+            "sequence": "GAGAGGATCCCAGCGGCaggggtcgaggagggagtcTCAGGGGGCGGTTCCCGGGCGACGTGGATAAGGGCGTCTGCGCGTCGACA"
+        }
+    ],
+    "tracks": {}
+}

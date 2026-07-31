@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <style>
+    body {
+      background: #fafafa;
+      font-family: "Satoshi", system-ui, sans-serif;
+    }
+    gene-viewer {
+      --gene-viewer-background-color: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div id="demo"></div>
+
+  <script type="module">
+    import { html, render } from 'lit';
+    import '../dist/src/gene-viewer.js';
+
+    render(
+      html`
+        <gene-viewer viewerServer="/api/example" viewerId="demo-viewer" parallelProbesets="3" />
+      `,
+      document.querySelector('#demo')
+    );
+  </script>
+</body>
+</html>
