@@ -19,13 +19,20 @@
   <script type="module">
     import { html, render } from 'lit';
     import '../dist/src/gene-viewer.js';
+    import TestData from '../src/test.json' with { type: 'json' };
 
     render(
       html`
-        <gene-viewer viewerServer="/api/example" viewerId="demo-viewer" parallelProbesets="3" />
+        <gene-viewer-custom parallelProbesets="3"></gene-viewer-custom>
+        <gene-viewer viewerServer="http://localhost:5000/api/visualization" viewerId="homo_sapiens"></gene-viewer>
       `,
       document.querySelector('#demo')
     );
+
+    const geneViewer = document.querySelector('gene-viewer-custom');
+    geneViewer.setGene(TestData);
+    geneViewer.showProbesets(["Oligoset 1", "Oligoset 2", "Oligoset 3"]);
+    geneViewer.selectProbe("AARS1::12425");
   </script>
 </body>
 </html>

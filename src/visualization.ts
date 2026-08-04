@@ -109,6 +109,8 @@ const setupScalesAndAxes = (
     const ext = d3.extent([
         ...Object.values(gene.probes).flat().flatMap((d: Probe) => [d.start, d.end]),
         ...Object.values(gene.regions).flat().flatMap((d: Region) => [d.start, d.end]),
+        // TODO: also sequences and tracks?
+        ...Object.values(gene.sequences).flat().flatMap((d: { start: number; sequence: string }) => [d.start, d.start + d.sequence.length - 1]),
     ]) as [number, number];
     const extentPadding = (ext[1] - ext[0]) * 0.01; // add % padding on each side
     context.xScale
@@ -581,7 +583,7 @@ const zoomed = (
                         .append("path")
                         .attr(
                             "d",
-                            gene.strand === "+" ? arrowPath : arrowPathInverted
+                            d.strand === "+" ? arrowPath : arrowPathInverted
                         )
                         .attr("stroke", "white")
                         .attr("fill", "transparent")
@@ -621,6 +623,7 @@ class GeneViewerVisualization {
     private setSelectedProbe: (id: string | null) => void;
     private context: VisualizationContext;
     private parallelProbesets: number;
+    private scaleFactor: number;
 
     /**
      * Creates a new GeneViewerVisualization instance and initializes the visualization.
@@ -630,6 +633,8 @@ class GeneViewerVisualization {
      * @param visibleProbesets The list of probesets that should be visible in the visualization.
      * @param selectedProbe The currently selected probe, or null if no probe is selected.
      * @param setSelectedProbe A callback function to set the currently selected probe.
+     * @param parallelProbesets The maximum number of probesets to display in parallel.
+     * @param scaleFactor The scale factor for the visualization (not currently used).
      */
     constructor(
         el: HTMLElement,
@@ -638,6 +643,7 @@ class GeneViewerVisualization {
         selectedProbe: string | null,
         setSelectedProbe: (id: string | null) => void,
         parallelProbesets: number,
+        scaleFactor: number
     ) {
         this.gene = gene;
         this.visibleProbesetIds = visibleProbesets;
@@ -645,6 +651,7 @@ class GeneViewerVisualization {
         this.setSelectedProbe = setSelectedProbe;
         this.parallelProbesets = Math.min(parallelProbesets, Object.keys(gene.probes).length);
         this.context = createContext(el, gene, this.parallelProbesets);
+        this.scaleFactor = scaleFactor;
 
         this._init();
     }

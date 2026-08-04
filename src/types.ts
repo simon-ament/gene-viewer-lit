@@ -21,7 +21,8 @@ export interface Probes {
 export interface Region {
     start: number;
     end: number;
-    type?: string;
+    strand: string;
+    type: string;
     description?: string;
 }
 
@@ -51,9 +52,8 @@ export interface Tracks {
 
 export interface Gene {
     id: string;
-    source: string;
-    species: string;
-    strand: '+' | '-';
+    species: string | null;
+    source: string | null;
     probes: Probes;
     regions: Regions;
     sequences: Sequences;
