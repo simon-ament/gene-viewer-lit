@@ -1,7 +1,7 @@
 import { html, css, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import {map} from 'lit/directives/map.js';
-import { Gene } from './types.js';
+import { Gene, ProbeSelection } from './types.js';
 import GeneViewerVisualization from './visualization.js';
 
 class GeneViewerBase extends LitElement {
@@ -10,11 +10,15 @@ class GeneViewerBase extends LitElement {
 
     static styles = css`
     :host {
+        --background-color: var(--gene-viewer-background-color, #fff);
+        --text-color: var(--gene-viewer-text-color, #000);
+        --border-color: var(--gene-viewer-border-color, #888);
+
         display: block;
         padding: 2rem;
-        background-color: var(--gene-viewer-background-color, #fff);
-        color: var(--gene-viewer-text-color, #000);
-        border: 1px solid var(--gene-viewer-border-color, #888);
+        background-color: var(--background-color);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
         border-radius: 1rem;
         margin: 1rem;
     }
@@ -26,12 +30,38 @@ class GeneViewerBase extends LitElement {
     .export-button {
         margin-bottom: 1rem;
         padding: 0.5rem 1rem;
-        background-color: var(--gene-viewer-background-color, #fff);
-        color: var(--gene-viewer-text-color, #000);
-        border: 1px solid var(--gene-viewer-border-color, #888);
+        background-color: var(--background-color);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
         border-radius: 0.3rem;
         cursor: pointer;
+        font-weight: normal;
     }
+
+    .probeset-selectors {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .probeset-selectors select {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color, #888);
+        background-color: var(--background-color, #fff);
+        color: var(--text-color, #000);
+        border-radius: 0.3rem;
+    }
+
+    .controls-container {
+        position: relative;
+    }
+
+    .controls {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        gap: 2rem;
     `;
 
     /* Properties */
@@ -49,10 +79,13 @@ class GeneViewerBase extends LitElement {
     protected _visibleProbesetIds: string[] = [];
 
     @state()
-    protected _selectedProbeId: string | null = null;
+    protected _selection: ProbeSelection = { probesetId: null, probeIds: [] };
 
     @state()
     protected _visualization: GeneViewerVisualization | null = null;
+
+    @state()
+    protected _isHelpVisible: boolean = false; // TODO: Implement help toggle functionality
 
     /* Queries */
 
@@ -66,30 +99,51 @@ class GeneViewerBase extends LitElement {
     }
 
     public showProbesets(probesetIds: string[]) {
-        this._visibleProbesetIds = probesetIds;
-        if (this._visualization) {
-            this._visualization.showProbesets(probesetIds);
-        }
+        this._visibleProbesetIds = probesetIds; // trigger update() to update the visualization
     }
 
-    public selectProbe(probeId: string) {
-        this._selectedProbeId = probeId;
-        if (this._visualization) {
-            this._visualization.selectProbe(probeId);
-        }
+    public selectProbe(probeId: string | null) {
+        this._selection = { probesetId: null, probeIds: probeId ? [probeId] : [] }; // trigger update() to update the visualization
+    }
+
+    public selectProbeset(probesetId: string) {
+        const probeIds = this._gene && this._gene.probes[probesetId] ? Object.keys(this._gene.probes[probesetId]) : [];
+        this._selection = { probesetId: probesetId, probeIds: probeIds }; // trigger update() to update the visualization
     }
 
     /* Lifecycle */
 
+    willUpdate(changedProperties: Map<string, any>) {
+        super.willUpdate(changedProperties);
+
+        if (changedProperties.has('_gene')) {
+            if (!this._gene) {
+                return;
+            }
+
+            if (this._visibleProbesetIds.length === 0) {
+                /// can be overriden by update()
+                this._visibleProbesetIds = Object.keys(this._gene.probes).slice(0, this.parallelProbesets);
+            }
+        }
+    }
+
     update(changedProperties: Map<string, any>) {
         super.update(changedProperties);
 
-        if (changedProperties.has('_visibleProbesetIds') && this._visualization) {
-            this._visualization.showProbesets(this._visibleProbesetIds);
+        if (changedProperties.has('_gene') && this._visualization) {
+            this._visualization.destroy();
+            this._visualization = null;
+            this._visibleProbesetIds = [];
         }
 
-        if (changedProperties.has('_selectedProbeId') && this._visualization) {
-            this._visualization.selectProbe(this._selectedProbeId);
+        if (changedProperties.has('_visibleProbesetIds') && this._visualization) {
+            this._visualization.showProbesets(this._visibleProbesetIds);
+            this.selectProbe(null); // reset selected probe when probesets change
+        }
+
+        if (changedProperties.has('_selection') && this._visualization) {
+            this._visualization.select(this._selection);
         }
     }
 
@@ -99,22 +153,15 @@ class GeneViewerBase extends LitElement {
         // If the gene has changed, re-initialize the visualization
         if (changedProperties.has('_gene')) {
             if (!this._gene) {
-                if (this._visualization) {
-                    this._visualization.destroy();
-                    this._visualization = null;
-                }
                 return;
             }
 
-            if (this._visualization) {
-                this._visualization.destroy();
-            }
             this._visualization = new GeneViewerVisualization(
                 this._articleElement,
                 this._gene,
                 this._visibleProbesetIds,
-                this._selectedProbeId,
-                (id: string | null) => { this._selectedProbeId = id; },
+                this._selection,
+                (selection: ProbeSelection) => { this._selection = selection; },
                 this.parallelProbesets,
                 this.scaleFactor
             );
@@ -128,12 +175,23 @@ class GeneViewerBase extends LitElement {
             }));
         }
 
-        if (changedProperties.has('_selectedProbeId')) {
-            this.dispatchEvent(new CustomEvent('probeSelected', {
-                detail: { previousProbeId: changedProperties.get('_selectedProbeId'), newProbeId: this._selectedProbeId },
+        if (changedProperties.has('_selection')) {
+            const previousSelection = changedProperties.get('_selection') as ProbeSelection;
+            const probesetChanged = previousSelection.probesetId !== this._selection.probesetId;
+
+            this.dispatchEvent(new CustomEvent('probesSelected', {
+                detail: { previousProbeIds: previousSelection.probeIds, newProbeIds: this._selection.probeIds },
                 bubbles: true,
                 composed: true
             }));
+
+            if (probesetChanged) {
+                this.dispatchEvent(new CustomEvent('probesetSelected', {
+                    detail: { previousProbesetId: previousSelection.probesetId, newProbesetId: this._selection.probesetId },
+                    bubbles: true,
+                    composed: true
+                }));
+            }
         }
     }
 
@@ -155,8 +213,11 @@ class GeneViewerBase extends LitElement {
     }
 
     renderProbesetSelectors() {
-        const selectableProbesets = this._gene ? Object.keys(this._gene.probes).filter((id) => !this._visibleProbesetIds.includes(id)) : [];
+        if (!this._gene || !this._gene.probes || Object.keys(this._gene.probes).length === 0) {
+            return html``;
+        }
         const range = Array.from({ length: this.parallelProbesets }, (_, i) => i);
+        const probesetIds = Object.keys(this._gene.probes);
 
         return html`
             <div class="probeset-selectors">
@@ -168,9 +229,8 @@ class GeneViewerBase extends LitElement {
                         newVisibleProbesets[index] = selectedId;
                         this.showProbesets(newVisibleProbesets);
                     }}>
-                        <option selected value=${this._visibleProbesetIds[index]}>${this._visibleProbesetIds[index]}</option>
-                        ${map(selectableProbesets, (probesetId) => html`
-                            <option value=${probesetId}>${probesetId}</option>
+                        ${map(probesetIds, (probesetId) => html`
+                            <option .selected=${probesetId === this._visibleProbesetIds[index]} value=${probesetId}>${probesetId}</option>
                         `)}
                     </select>
                 `)}
@@ -184,10 +244,20 @@ class GeneViewerBase extends LitElement {
         `;
     }
 
+    renderControls() {
+        return html`
+            <div class="controls-container">
+                <div class="controls">
+                ${this.renderProbesetSelectors()}
+                ${this.renderExportButton()}
+                </div>
+            </div>
+        `;
+    }
+
     render() {
         return html`
-            ${this.renderExportButton()}
-            ${this.renderProbesetSelectors()}
+            ${this.renderControls()}
             ${this.renderViewer()}
         `;
     }
@@ -284,9 +354,9 @@ export class GeneViewer extends GeneViewerBase {
 
     /* Render */
 
-    render() {
-        if (!this._geneId || !this._geneList || !this._gene) {
-            return html`<h2>Loading gene data...</h2>`;
+    renderGeneListAutocomplete() {
+        if (!this._geneList) {
+            return html``;
         }
 
         return html`
@@ -295,7 +365,26 @@ export class GeneViewer extends GeneViewerBase {
                 .geneList=${this._geneList}
                 @gene-selected=${(e: CustomEvent) => this.showGene(e.detail.geneId)}
             ></gene-list-autocomplete>
-            ${super.render()}
         `;
+    }
+
+    renderControls() {
+        return html`
+            <div class="controls-container">
+                <div class="controls">
+                    ${this.renderGeneListAutocomplete()}
+                    ${this.renderProbesetSelectors()}
+                    ${this.renderExportButton()}
+                </div>
+            </div>
+        `;
+    }
+
+    render() {
+        if (!this._geneId || !this._geneList || !this._gene) {
+            return html`<h2>Loading gene data...</h2>`;
+        }
+
+        return super.render();
     }
 }

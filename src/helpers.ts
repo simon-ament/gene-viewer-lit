@@ -1,4 +1,4 @@
-import type { Region, Regions, Probe, Gene, Probes } from "./types.js";
+import type { Region, Regions, Probe, Gene, Probes, Feature } from "./types.js";
 import { RegionMap } from "./constants.js";
 
 export type ProbePosition = {
@@ -47,6 +47,7 @@ export const regionTooltipHTML = (
 ) => {
     return (
         RegionMap[region.type || "unknown"].label +
+        (region.exon_number ? " " + region.exon_number : "") +
         (region.description ? `<br>${region.description}` : "") +
         (transcriptName !== "unknown"
             ? `<br>Transcript: ${transcriptName}`
@@ -77,6 +78,18 @@ export const transcriptTooltipHTML = (
             : `${uniqueProbeIds.length} probes match this transcript`)
     );
 };
+
+/**
+ * Generates HTML content for tooltips when hovering a feature.
+ *
+ * @param feature The feature for which the tooltip is being generated.
+ * @returns A string containing HTML content for the tooltip.
+ */
+export const featureTooltipHTML = (feature: Feature) => {
+    return (
+        `Feature: ${feature.description || "unknown"}`
+    );
+}
 
 /**
  * Calculates the spacing between arrows in the visualization based on the visible range of the region, avoiding overcrowding.
@@ -267,7 +280,23 @@ export const exportSVG = (
 ) => {
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(el);
-    const blob = new Blob([svgString], { type: "image/svg+xml" });
+
+    // replace CSS variables with their computed values
+    const computedStyles = getComputedStyle(el);
+    const cssVariables = Array.from(computedStyles).filter((prop) => prop.startsWith("--"));
+    let svgStringWithComputedStyles = svgString;
+
+    console.log("CSS Variables:", cssVariables);
+
+    cssVariables.forEach((variable) => {
+        const value = computedStyles.getPropertyValue(variable).trim();
+        const regex = new RegExp(`var\\(${variable}\\)`, "g");
+        svgStringWithComputedStyles = svgStringWithComputedStyles.replace(regex, value);
+    });
+
+    // TODO: embed fonts?
+
+    const blob = new Blob([svgStringWithComputedStyles], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");

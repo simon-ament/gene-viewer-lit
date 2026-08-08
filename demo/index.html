@@ -11,6 +11,12 @@
     gene-viewer {
       --gene-viewer-background-color: #fafafa;
     }
+
+    /* gene-viewer-custom {
+      --gene-viewer-background-color: #d6f6c6;
+      --gene-viewer-text-color: #000;
+      --gene-viewer-border-color: #888;
+    } */
   </style>
 </head>
 <body>
@@ -23,15 +29,16 @@
 
     render(
       html`
-        <gene-viewer-custom parallelProbesets="3"></gene-viewer-custom>
-        <gene-viewer viewerServer="http://localhost:5000/api/visualization" viewerId="homo_sapiens"></gene-viewer>
+        <gene-viewer-custom parallelProbesets="3" scaleFactor="0.9"></gene-viewer-custom>
+        <div style="height: 20rem;"></div>
+        <gene-viewer viewerServer="http://localhost:5000/api/visualization" parallelProbesets="0" viewerId="drosophilia"></gene-viewer>
       `,
       document.querySelector('#demo')
     );
 
     const geneViewer = document.querySelector('gene-viewer-custom');
     geneViewer.setGene(TestData);
-    geneViewer.showProbesets(["Oligoset 1", "Oligoset 2", "Oligoset 3"]);
+    geneViewer.showProbesets(["Oligoset 1", "Oligoset 3", "Oligoset 2"]);
     geneViewer.selectProbe("AARS1::12425");
   </script>
 </body>

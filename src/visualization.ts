@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import type { Region, Probe, Gene, Probes } from "./types.js";
+import type { Region, Probe, Gene, Feature, Sequence, ProbeSelection } from "./types.js";
 import {
     calculateArrowSpacing,
     centeredMinWidthRect,
@@ -7,6 +7,7 @@ import {
     collectProbeComponents,
     collectReferenceBases,
     exportSVG,
+    featureTooltipHTML,
     probeTooltipHTML,
     regionTooltipHTML,
     transcriptTooltipHTML,
@@ -14,32 +15,45 @@ import {
     type ProbePosition,
 } from "./helpers.js";
 import { RegionMap } from "./constants.js";
+import { drawLegend } from "./visualization/legend.js";
+import { updateLocationIndicator } from "./visualization/location-indicator.js";
 
-type VisualizationContext = {
+export type VisualizationContext = {
     svg: d3.Selection<SVGElement, unknown, null, unknown>;
     plot: d3.Selection<SVGGElement, unknown, null, unknown>;
-    locationIndicator: d3.Selection<SVGRectElement, unknown, null, unknown>;
-    positionLabelGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
     probesGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
-    tooltip: d3.Selection<HTMLDivElement, unknown, null, unknown>;
+    tracksGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
     regionsGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
     baseGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
-    readingGridTicksGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
+    locationIndicator: d3.Selection<SVGRectElement, unknown, null, unknown>;
+    locationIndicatorPosition: number;
+    positionLabelGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
+    legendGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
+    tooltip: d3.Selection<HTMLDivElement, unknown, null, unknown>;
     xScale: d3.ScaleLinear<number, number>;
     xAxis: d3.Selection<SVGGElement, unknown, null, unknown>;
-    zoomBehavior: d3.ZoomBehavior<SVGElement, unknown>;
+    zoomBehavior: d3.ZoomBehavior<SVGGElement, unknown>;
     currentZoomTransform: d3.ZoomTransform;
     height: number;
     parallelProbesets: number;
+    softenedScaleFactor: number;
+    scaledWidth: number;
+    svgWidth: number;
+    svgHeight: number;
 };
 
 const WIDTH = 800;
 const PROBE_HEIGHT = 20;
 const TRANSCRIPT_HEIGHT = 20;
 const TRANSCRIPT_MARKER_WIDTH = 8;
+const TRACK_HEIGHT = 15;
 const GAP = 50;
 const AXIS_HEIGHT = 20;
 const MIN_PROBE_WIDTH = 2;
+export const PADDING_LEFT = 70;
+const PADDING_RIGHT = 0;
+const PADDING_TOP = 120;
+const PADDING_BOTTOM = 0;
 
 /**
  * Creates the D3 visualization context by creating the necessary SVG elements and groups.
@@ -50,26 +64,42 @@ const MIN_PROBE_WIDTH = 2;
 const createContext = (
     el: HTMLElement,
     gene: Gene,
-    parallelProbesets: number
+    parallelProbesets: number,
+    scaleFactor: number
 ): VisualizationContext => {
     const svg = d3.select(el).select("svg") as d3.Selection<SVGElement, unknown, null, unknown>;
+    svg.append("rect")
+        .attr("id", "svg-background")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("fill", "var(--background-color)");
     const height =
         Object.keys(gene.regions).length * TRANSCRIPT_HEIGHT +
         parallelProbesets * PROBE_HEIGHT +
         GAP +
         AXIS_HEIGHT;
+    const scaledWidth = WIDTH / scaleFactor;
+    const svgWidth = scaledWidth + PADDING_LEFT + PADDING_RIGHT;
+    const svgHeight = height + PADDING_TOP + PADDING_BOTTOM;
+    const softenedScaleFactor = 1 + (scaleFactor - 1) * 0.5;
 
     const plot = svg.append("g");
-    const locationIndicator = plot.append("rect");
+    plot.append("rect")
+        .attr("id", "plot-background")
+        .attr("width", scaledWidth)
+        .attr("height", height)
+        .attr("fill", "var(--background-color)")
+    const locationIndicator = plot.append("rect").attr("id", "location-indicator");
     const probesGroup = plot.append("g").attr("class", "probes");
-    const tooltip = d3.select(el).append("div");
+    const tracksGroup = plot.append("g").attr("class", "tracks");
     const regionsGroup = plot.append("g").attr("class", "genomic-regions");
-    const baseGroup = plot.append("g");
-    const readingGridTicksGroup = plot.append("g");
+    const baseGroup = plot.append("g").attr("class", "reference-bases");
+    const legendGroup = svg.append("g").attr("class", "legend");
+    const tooltip = d3.select(el).append("div").attr("id", "region-tooltip");
 
-    const zoomBehavior = d3.zoom() as d3.ZoomBehavior<SVGElement, unknown>;
+    const zoomBehavior = d3.zoom() as d3.ZoomBehavior<SVGGElement, unknown>;
     const xScale = d3.scaleLinear();
-    const xAxis = plot.append("g");
+    const xAxis = svg.append("g");
     const positionLabelGroup = plot
         .append("g")
         .attr("id", "position-label-group");
@@ -79,19 +109,25 @@ const createContext = (
     return {
         svg,
         plot,
-        locationIndicator,
-        positionLabelGroup,
         probesGroup,
-        tooltip,
+        tracksGroup,
         regionsGroup,
         baseGroup,
-        readingGridTicksGroup,
+        locationIndicator,
+        locationIndicatorPosition: 0,
+        positionLabelGroup,
+        legendGroup,
+        tooltip,
         xScale,
         xAxis,
         zoomBehavior,
         currentZoomTransform: d3.zoomIdentity,
         height,
         parallelProbesets,
+        softenedScaleFactor,
+        scaledWidth,
+        svgWidth,
+        svgHeight,
     };
 };
 
@@ -109,21 +145,25 @@ const setupScalesAndAxes = (
     const ext = d3.extent([
         ...Object.values(gene.probes).flat().flatMap((d: Probe) => [d.start, d.end]),
         ...Object.values(gene.regions).flat().flatMap((d: Region) => [d.start, d.end]),
-        // TODO: also sequences and tracks?
-        ...Object.values(gene.sequences).flat().flatMap((d: { start: number; sequence: string }) => [d.start, d.start + d.sequence.length - 1]),
+        ...Object.values(gene.sequences).flat().flatMap((d: Sequence) => [d.start, d.start + d.sequence.length - 1]),
+        ...Object.values(gene.tracks).flat().flatMap((d: Feature) => [d.start, d.end]),
     ]) as [number, number];
-    const extentPadding = (ext[1] - ext[0]) * 0.01; // add % padding on each side
+    const extentPadding = (ext[1] - ext[0]) * 0.01; // add 1% padding on each side
     context.xScale
         .domain([ext[0] - extentPadding, ext[1] + extentPadding])
-        .range([1, WIDTH - 1]);
-    const axis = d3.axisBottom(context.xScale).ticks(8);
+        .range([0.5, context.scaledWidth - 0.5]);
+    const axis = d3.axisBottom(context.xScale).ticks(8 / context.softenedScaleFactor);
 
-    // Append the x-axis inside the plot area
+    // Append the x-axis in the outer SVG padding so it is not clipped by the plot
     context.xAxis
         .attr("class", "x-axis select-none")
-        .attr("transform", `translate(0, ${context.height - AXIS_HEIGHT})`)
+        .attr(
+            "transform",
+            `translate(${PADDING_LEFT}, ${PADDING_TOP + context.height - AXIS_HEIGHT})`
+        )
         .style("font-family", "inherit")
-        .call(axis);
+        .call(axis)
+        .attr("clip-path", "url(#plot-clip)");
 };
 
 /**
@@ -137,19 +177,27 @@ const setupElements = (
     gene: Gene,
 ) => {
     context.svg
-        .attr("viewBox", [0, 0, WIDTH, context.height])
-        .attr("width", WIDTH)
-        .attr("height", context.height)
+        .attr("viewBox", [0, 0, context.svgWidth, context.svgHeight])
+        .attr("width", context.svgWidth)
+        .attr("height", context.svgHeight)
         .attr("style", "width: 100%; height: auto;");
+
+    context.plot
+        .attr("transform", `translate(${PADDING_LEFT}, ${PADDING_TOP})`)
+        .attr("clip-path", "url(#plot-clip)")
+        .append("clipPath")
+        .attr("id", "plot-clip")
+        .append("rect")
+        .attr("width", context.scaledWidth)
+        .attr("height", context.height);
 
     // Location indicator as vertical bar following the mouse
     context.locationIndicator
-        .attr("id", "location-indicator")
         .attr("x", 0)
         .attr("y", 0)
         .attr("width", context.xScale(1) - context.xScale(0))
         .attr("height", context.height - AXIS_HEIGHT)
-        .attr("fill", "black")
+        .attr("fill", "contrast-color(var(--background-color))")
         .attr("opacity", 0)
         .attr("visibility", "hidden")
         .attr("pointer-events", "none"); // allow mouse events to pass through
@@ -162,12 +210,12 @@ const setupElements = (
         .attr("y", context.parallelProbesets * PROBE_HEIGHT + GAP / 2 + 5) // position within the gap between probes and transcripts
         .attr("text-anchor", "start")
         .attr("font-size", 9)
-        .attr("fill", "black");
+        .attr("fill", "var(--text-color)");
 
     // Position label background
     context.positionLabelGroup
         .select("rect")
-        .attr("fill", "var(--gene-viewer-background-color, #fff)")
+        .attr("fill", "var(--background-color)")
         .attr("opacity", 1)
         .attr("pointer-events", "none");
 
@@ -180,9 +228,8 @@ const setupElements = (
     // Tooltip div for probes, regions, and transcripts
     context.tooltip
         .style("opacity", 0)
-        .attr("id", "region-tooltip")
-        .style("background-color", "white")
-        .style("border", "1px solid #b0b0b0")
+        .style("background-color", "var(--background-color)")
+        .style("border", "1px solid var(--border-color)")
         .style("border-width", "1px")
         .style("border-radius", "5px")
         .style("box-shadow", "0 0.5rem 1rem rgba(0, 0, 0, 0.1)")
@@ -213,25 +260,28 @@ const setupElements = (
                 (d: Region) =>
                     `translate(${context.xScale(d.start - 0.5)}, 0)`
             )
-            .on("mouseover", function () {
-                context.tooltip.style("opacity", 1);
-            })
-            .on("mousemove", (event, d: Region) => {
+            .on("mouseover", function (_, d: Region) {
                 context.tooltip
-                    .html(regionTooltipHTML(d, transcriptName))
+                    .html(regionTooltipHTML(d, transcriptName))    
+                    .style("opacity", 1);
+            })
+            .on("mousemove mousemove-forwarded", (event) => {
+                const xPos = event instanceof MouseEvent ? event.pageX : event.detail.pageX;
+                const yPos = event instanceof MouseEvent ? event.pageY : event.detail.pageY;
+                context.tooltip
                     .style(
                         "left",
-                        event.pageX > window.innerWidth / 2
+                        xPos > window.innerWidth / 2
                             ? ""
-                            : event.pageX + 20 + "px"
+                            : xPos + 20 + "px"
                     )
                     .style(
                         "right",
-                        event.pageX > window.innerWidth / 2
-                            ? window.innerWidth - event.pageX + 10 + "px"
+                        xPos > window.innerWidth / 2
+                            ? window.innerWidth - xPos + 10 + "px"
                             : ""
                     )
-                    .style("top", event.pageY + "px")
+                    .style("top", yPos + "px")
                     .style("bottom", ""); // reset bottom in case it was set before
             })
             .on("mouseleave", function () {
@@ -291,66 +341,88 @@ const setupElements = (
                 .attr("width", TRANSCRIPT_MARKER_WIDTH)
                 .attr("height", TRANSCRIPT_HEIGHT * 0.9)
                 .attr("fill", "transparent")
-                .on("mouseover", function () {
-                    context.tooltip.style("opacity", 1);
-                })
-                .on("mousemove", (event, d) => {
+                .on("mouseover", function (_, d: string) {
                     context.tooltip
                         .html(transcriptTooltipHTML(d, gene.probes))
-                        .style("left", event.pageX + 20 + "px")
-                        .style("top", event.pageY + "px")
+                        .style("opacity", 1);
+                })
+                .on("mousemove mousemove-forwarded", (event) => {
+                    const xPos = event instanceof MouseEvent ? event.pageX : event.detail.pageX;
+                    const yPos = event instanceof MouseEvent ? event.pageY : event.detail.pageY;
+                    context.tooltip
+                        .style("left", xPos + 20 + "px")
+                        .style("top", yPos + "px")
                         .style("bottom", ""); // reset bottom in case it was set before
                 })
                 .on("mouseleave", function () {
                     context.tooltip.style("opacity", 0);
                 });
         }
+
+        // Y-axis labels for transcripts
+        context.svg.append("text")
+            .attr("class", "y-axis-label select-none")
+            .attr("x", PADDING_LEFT - 10)
+            .attr("y", PADDING_TOP + yOffset + TRANSCRIPT_HEIGHT / 2)
+            .attr("text-anchor", "end")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", 8)
+            .attr("fill", "var(--text-color)")
+            .text(transcriptName.slice(0, 10) + (transcriptName.length > 10 ? "..." : "")) // truncate long names
+            .attr("title", transcriptName); // show full name on hover
     });
 
-    context.baseGroup.attr("class", "reference-bases");
-    context.readingGridTicksGroup.attr("class", "reading-grid-ticks");
-};
+    // Draw custom tracks below the genomic regions
+    Object.entries(gene.tracks).forEach(([trackName, features], index) => {
+        const yOffset =
+            context.parallelProbesets * PROBE_HEIGHT +
+            GAP +
+            Object.keys(gene.regions).length * TRANSCRIPT_HEIGHT +
+            index * TRACK_HEIGHT;
+        
+        const trackGroup = context.tracksGroup
+            .append("g")
+            .attr("class", "track")
+            .attr("transform", `translate(0, ${yOffset})`);
 
-/**
- * Updates the position of the location indicator and its label.
- *
- * @param context The visualization context object.
- * @param xPos The x position (in pixels) where the location indicator should be updated to.
- */
-const updateLocationIndicatorAndTooltip = (
-    context: VisualizationContext,
-    xPos: number
-) => {
-    const zx = context.currentZoomTransform.rescaleX(context.xScale);
-    const domainX = zx.invert(xPos);
-    const snapX = Math.floor(domainX + 0.5);
-    const x = zx(snapX - 0.5);
+        trackGroup
+            .selectAll("g")
+            .data(features)
+            .join("rect")
+            .attr("class", "track-feature")
+            .attr("x", (d: Feature) => context.xScale(d.start - 0.5))
+            .attr("width", (d: Feature) => context.xScale(d.end + 0.5) - context.xScale(d.start - 0.5))
+            .on("mouseover", function (_, d: Feature) {
+                context.tooltip
+                    .html(featureTooltipHTML(d))
+                    .style("opacity", 1);
+            })
+            .on("mousemove mousemove-forwarded", (event) => {
+                const xPos = event instanceof MouseEvent ? event.pageX : event.detail.pageX;
+                const yPos = event instanceof MouseEvent ? event.pageY : event.detail.pageY;
+                context.tooltip
+                    .style("left", xPos + 20 + "px")
+                    .style("top", yPos + "px")
+                    .style("bottom", ""); // reset bottom in case it was set before
+            })
+            .on("mouseleave", function () {
+                context.tooltip.style("opacity", 0);
+            });
 
-    context.locationIndicator.attr("x", x);
-    context.positionLabelGroup
-        .select("text")
-        .attr("x", x + 10) // add some padding from the indicator
-        .text(snapX.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")); // insert commas for thousands
+        // Y-axis labels for tracks
+        context.svg.append("text")
+            .attr("class", "y-axis-label select-none")
+            .attr("x", PADDING_LEFT - 10)
+            .attr("y", PADDING_TOP + yOffset + TRACK_HEIGHT / 2)
+            .attr("text-anchor", "end")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", 8)
+            .attr("fill", "var(--text-color)")
+            .text(trackName.slice(0, 10) + (trackName.length > 10 ? "..." : "")) // truncate long names
+            .attr("title", trackName); // show full name on hover
+    });
 
-    const positionLabelNode = context.positionLabelGroup
-        .select("text")
-        .node() as SVGTextElement;
-    if (!positionLabelNode) {
-        return;
-    }
-
-    const { x: labelX, y: labelY, width, height } = positionLabelNode.getBBox();
-    const paddingRight = 4;
-    const paddingLeft = 2;
-    const paddingY = 5;
-    context.positionLabelGroup
-        .select("rect")
-        .attr("x", labelX - paddingLeft)
-        .attr("y", labelY - paddingY)
-        .attr("width", width + paddingLeft + paddingRight)
-        .attr("height", height + paddingY * 2);
-
-    // TODO: update tooltip position
+    drawLegend(context.legendGroup, gene, { probesetId: null, probeIds: [] });
 };
 
 /**
@@ -362,24 +434,27 @@ const updateLocationIndicatorAndTooltip = (
  */
 const setupMouseEvents = (
     context: VisualizationContext,
-    setSelectedProbe: (id: string | null) => void,
+    setSelection: (selection: ProbeSelection) => void,
 ) => {
     const preventPageScroll: EventListener = (event) => {
         event.preventDefault();
     };
-    context.svg
-        .on("click", () => setSelectedProbe(null)) // deselect probe when clicking on empty space
+    context.plot
+        .on("click", () => setSelection({ probesetId: null, probeIds: [] })) // deselect probes when clicking on empty space
         .on("wheel", preventPageScroll, { passive: false }) // some browsers default to passive wheel listeners
-        .on("mouseenter", () => {
+        .on("mouseenter", (event) => {
             context.locationIndicator.attr("visibility", "visible");
             context.positionLabelGroup.attr("visibility", "visible");
+            const [xPos] = d3.pointer(event, context.plot.node());
+            updateLocationIndicator(context, xPos);
         })
         .on("mousemove", (event) => {
             const [xPos] = d3.pointer(event, context.plot.node());
-            updateLocationIndicatorAndTooltip(context, xPos);
+            updateLocationIndicator(context, xPos);
         })
         .on("mouseleave", () => {
             context.locationIndicator.attr("visibility", "hidden");
+            context.locationIndicatorPosition = 0; // reset
             context.positionLabelGroup.attr("visibility", "hidden");
         });
 };
@@ -393,11 +468,12 @@ const setupMouseEvents = (
 const setupZoom = (
     context: VisualizationContext,
     gene: Gene,
-    selectedProbeId: string | null = null
+    selection: ProbeSelection,
+    visibleProbesetIds: string[]
 ) => {
     const extent: [[number, number], [number, number]] = [
         [0, 0],
-        [WIDTH, context.height],
+        [context.scaledWidth, context.height],
     ];
 
     context.zoomBehavior
@@ -407,9 +483,9 @@ const setupZoom = (
         ]) // max zoom to 100bp width
         .translateExtent(extent)
         .extent(extent)
-        .on("zoom", (e) => zoomed(e, context, gene, selectedProbeId));
+        .on("zoom", (e) => zoomed(e, context, gene, selection, visibleProbesetIds));
 
-    context.svg.call(context.zoomBehavior);
+    context.plot.call(context.zoomBehavior);
 };
 
 /**
@@ -420,26 +496,39 @@ const setupZoom = (
  * @param gene The gene data containing regions and probes to be visualized.
  */
 const zoomed = (
-    event: d3.D3ZoomEvent<SVGElement, unknown>,
+    event: d3.D3ZoomEvent<SVGGElement, unknown>,
     context: VisualizationContext,
     gene: Gene,
-    selectedProbeId: string | null = null
+    selection: ProbeSelection,
+    visibleProbesetIds: string[],
 ) => {
     context.currentZoomTransform = event.transform;
     const zx = event.transform.rescaleX(context.xScale);
 
-    context.locationIndicator.attr("width", zx(1) - zx(0));
-    const source = event.sourceEvent;
     const plotNode = context.plot.node();
-    if (source instanceof MouseEvent && plotNode) {
+    if (event.sourceEvent instanceof MouseEvent && plotNode) {
         // use mouse position to update location indicator and tooltip
-        const [xPos] = d3.pointer(source, plotNode);
-        updateLocationIndicatorAndTooltip(context, xPos);
+        const [xPos] = d3.pointer(event.sourceEvent, plotNode);
+        updateLocationIndicator(context, xPos);
+
+        if (event.sourceEvent.type === "mousemove") {
+            // event gets captured by D3, so we dispatch a custom event instead
+            const root = plotNode.getRootNode();
+
+            if (root instanceof ShadowRoot) {
+                const hoveredElement = root.elementFromPoint(event.sourceEvent.clientX, event.sourceEvent.clientY);
+                const mouseMoveEvent = new CustomEvent("mousemove-forwarded", {
+                    detail: {
+                        pageX: event.sourceEvent.pageX,
+                        pageY: event.sourceEvent.pageY,
+                    },
+                    bubbles: true,
+                });
+                hoveredElement?.dispatchEvent(mouseMoveEvent);
+            }
+        }
     } else {
-        // use last known position of the location indicator
-        // TODO: correctly update the location here
-        const xPos = Number(context.locationIndicator.attr("x"));
-        updateLocationIndicatorAndTooltip(context, xPos);
+        updateLocationIndicator(context); // use last known position
     }
 
     // Rescale location indicator
@@ -477,7 +566,7 @@ const zoomed = (
         );
 
     // Rescale x axis
-    const axis = d3.axisBottom(zx).ticks(8);
+    const axis = d3.axisBottom(zx).ticks(8 / context.softenedScaleFactor);
     context.xAxis.call(axis);
 
     // Rescale genomic regions
@@ -491,11 +580,17 @@ const zoomed = (
         .selectAll<SVGRectElement, Region>(".region-hover-pad")
         .attr("width", (d) => zx(d.end + 0.5) - zx(d.start - 0.5));
 
+    // Rescale tracks
+    context.tracksGroup
+        .selectAll<SVGGElement, Feature>(".track-feature")
+        .attr("x", (d) => zx(d.start - 0.5))
+        .attr("width", (d) => zx(d.end + 0.5) - zx(d.start - 0.5));
+
     // Calculate visible range
     const domain = zx.domain();
     const visibleRange = domain[1] - domain[0];
-    const showBases = visibleRange <= 120;
-    const showArrows = visibleRange <= 3000;
+    const showBases = visibleRange <= 120 / context.softenedScaleFactor;
+    const showArrows = visibleRange <= 3000 / context.softenedScaleFactor;
 
     // Show bases only when zoomed in and only if in view
     const bases = showBases
@@ -513,12 +608,17 @@ const zoomed = (
         .attr("x", (d) => zx(d.position))
         .attr("y", context.parallelProbesets * PROBE_HEIGHT + GAP - 2)
         .attr("font-size", 10)
+        .attr("fill", "var(--text-color)")
         .attr("text-anchor", "middle")
         .text((d) => d.char);
 
     // Show probe bases only when zoomed in and only if in view
     const probeBases = collectProbeBases(
-        Object.values(gene.probes).flat().filter((probe) => selectedProbeId ? probe.id === selectedProbeId : true),
+        Object.entries(gene.probes)
+            .filter(([probesetId]) => visibleProbesetIds.includes(probesetId))
+            .map(([_, probes]) => probes)
+            .flat()
+            .filter((probe) => selection.probeIds.length > 0 ? selection.probeIds.includes(probe.id) : true),
         bases,
         Math.floor(domain[0]),
         Math.ceil(domain[1])
@@ -531,6 +631,7 @@ const zoomed = (
         .attr("x", (d) => zx(d.position))
         .attr("y", context.parallelProbesets * PROBE_HEIGHT + 15)
         .attr("font-size", 10)
+        .attr("fill", "var(--text-color)")
         .attr("text-anchor", "middle")
         .text((d) => d.char);
 
@@ -558,7 +659,7 @@ const zoomed = (
             (d) =>
                 d.end >= domain[0] &&
                 d.start <= domain[1] &&
-                d.type !== "intron"
+                d.strand !== undefined
         );
         visible_regions
             .selectAll<SVGGElement, Region>(".strand-arrows")
@@ -619,11 +720,10 @@ const zoomed = (
 class GeneViewerVisualization {
     private gene: Gene;
     private visibleProbesetIds: string[];
-    private selectedProbeId: string | null;
-    private setSelectedProbe: (id: string | null) => void;
+    private selection: ProbeSelection;
+    private setSelection: (selection: ProbeSelection) => void;
     private context: VisualizationContext;
     private parallelProbesets: number;
-    private scaleFactor: number;
 
     /**
      * Creates a new GeneViewerVisualization instance and initializes the visualization.
@@ -631,27 +731,26 @@ class GeneViewerVisualization {
      * @param el The container element for the visualization.
      * @param gene The gene object containing probes and regions to be visualized.
      * @param visibleProbesets The list of probesets that should be visible in the visualization.
-     * @param selectedProbe The currently selected probe, or null if no probe is selected.
-     * @param setSelectedProbe A callback function to set the currently selected probe.
+     * @param selection The current selection of probes and probeset.
+     * @param setSelection A callback function to set the currently selected probes and probeset.
      * @param parallelProbesets The maximum number of probesets to display in parallel.
-     * @param scaleFactor The scale factor for the visualization (not currently used).
+     * @param scaleFactor The scale factor for the visualization.
      */
     constructor(
         el: HTMLElement,
         gene: Gene,
         visibleProbesets: string[],
-        selectedProbe: string | null,
-        setSelectedProbe: (id: string | null) => void,
+        selection: ProbeSelection,
+        setSelection: (selection: ProbeSelection) => void,
         parallelProbesets: number,
         scaleFactor: number
     ) {
         this.gene = gene;
         this.visibleProbesetIds = visibleProbesets;
-        this.selectedProbeId = selectedProbe;
-        this.setSelectedProbe = setSelectedProbe;
+        this.selection = selection;
+        this.setSelection = setSelection;
         this.parallelProbesets = Math.min(parallelProbesets, Object.keys(gene.probes).length);
-        this.context = createContext(el, gene, this.parallelProbesets);
-        this.scaleFactor = scaleFactor;
+        this.context = createContext(el, gene, this.parallelProbesets, scaleFactor);
 
         this._init();
     }
@@ -662,17 +761,18 @@ class GeneViewerVisualization {
     private _init() {
         setupScalesAndAxes(this.context, this.gene);
         setupElements(this.context, this.gene);
-        setupMouseEvents(this.context, this.setSelectedProbe);
-        setupZoom(this.context, this.gene, this.selectedProbeId);
+        setupMouseEvents(this.context, this.setSelection);
+        setupZoom(this.context, this.gene, this.selection, this.visibleProbesetIds);
 
         this.showProbesets(this.visibleProbesetIds);
-        this.selectProbe(this.selectedProbeId);
+        this.select(this.selection);
         
         zoomed(
-            { transform: d3.zoomIdentity } as d3.D3ZoomEvent<SVGElement, unknown>,
+            { transform: d3.zoomIdentity } as d3.D3ZoomEvent<SVGGElement, unknown>,
             this.context,
             this.gene,
-            this.selectedProbeId
+            this.selection,
+            this.visibleProbesetIds
         );
     }
     
@@ -682,8 +782,7 @@ class GeneViewerVisualization {
      * @param visibleProbesets The list of probesets that should be visible in the visualization.
      */
     public showProbesets(visibleProbesets: string[]) {
-        this.visibleProbesetIds = visibleProbesets.splice(0, this.parallelProbesets); // limit to the number of parallel probesets
-
+        this.visibleProbesetIds = visibleProbesets.slice(0, this.parallelProbesets); // limit to the number of parallel probesets
         type ProbeSetData = { probesetId: string; probes: Probe[] };
 
         const probesets: ProbeSetData[] = [];
@@ -700,6 +799,20 @@ class GeneViewerVisualization {
             .join("g")
             .attr("class", "probeset-track")
             .attr("transform", (_, i) => `translate(0, ${i * PROBE_HEIGHT})`)
+        
+        // horizontal probeset track line
+        probesetTracks
+            .selectAll<SVGLineElement, ProbeSetData>("line.track-line")
+            .data((d) => [d])
+            .join("line")
+            .attr("class", "track-line")
+            .attr("x1", 0)
+            .attr("x2", this.context.scaledWidth)
+            .attr("y1", PROBE_HEIGHT / 2 - 0.5)
+            .attr("y2", PROBE_HEIGHT / 2 - 0.5)
+            .attr("stroke", "contrast-color(var(--background-color))")
+            .attr("stroke-width", 1)
+            .attr("opacity", 0.2);
 
         // Draw probe components (probes and gaps)
         probesetTracks
@@ -749,51 +862,86 @@ class GeneViewerVisualization {
                     ).width
             )
             .attr("opacity", 0.5)
+            .attr("cursor", "pointer")
             .on("click", (event, data) => {
                 event.stopPropagation(); // prevent click from propagating to svg and deselecting probe
-                this.setSelectedProbe(data.id);
-                this.selectProbe(data.id, true); // zoom into selected probe (even if already selected)
+                this.select({ probesetId: null, probeIds: [data.id] }, true); // zoom into selected probe (even if already selected)
             })
-            .on("mouseover", () => {
-                this.context.tooltip.style("opacity", 1);
-            })
-            .on("mousemove", (event, d) => {
+            .on("mouseover", (_, d: Probe) => {
                 this.context.tooltip
-                    .html(probeTooltipHTML(d, this.gene.regions))
+                    .html(probeTooltipHTML(d, this.gene.regions))    
+                    .style("opacity", 1);
+            })
+            .on("mousemove mousemove-forwarded", (event) => {
+                const xPos = event instanceof MouseEvent ? event.pageX : event.detail.pageX;
+                const yPos = event instanceof MouseEvent ? event.pageY : event.detail.pageY;
+                this.context.tooltip
                     .style(
                         "left",
-                        event.pageX > window.innerWidth / 2
+                        xPos > window.innerWidth / 2
                             ? ""
-                            : event.pageX + 20 + "px"
+                            : xPos + 20 + "px"
                     )
                     .style(
                         "right",
-                        event.pageX > window.innerWidth / 2
-                            ? window.innerWidth - event.pageX + 10 + "px"
+                        xPos > window.innerWidth / 2
+                            ? window.innerWidth - xPos + 10 + "px"
                             : ""
                     )
-                    .style("bottom", window.innerHeight - event.pageY + "px")
+                    .style("bottom", window.innerHeight - yPos + "px")
                     .style("top", ""); // reset top in case it was set before
             })
             .on("mouseleave", () => {
                 this.context.tooltip.style("opacity", 0);
             });
+
+        // Y-axis labels for probesets
+        this.context.svg.selectAll<SVGTextElement, string>(".y-axis-label-probeset").remove(); // remove old labels
+        this.context.svg.selectAll<SVGTextElement, string>(".y-axis-label-probeset")
+            .data(this.visibleProbesetIds)
+            .join("text")
+            .attr("class", "y-axis-label-probeset select-none")
+            .attr("x", PADDING_LEFT - 10)
+            .attr("y", (_, i) => PADDING_TOP + i * PROBE_HEIGHT + PROBE_HEIGHT / 2)
+            .attr("text-anchor", "end")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", 8)
+            .attr("cursor", "pointer")
+            .attr("fill", "var(--text-color)")
+            .text((d) => d.slice(0, 10) + (d.length > 10 ? "..." : "")) // truncate long names
+            .attr("title", (d) => d) // show full name on hover
+            .on("click", (event, d) => {
+                event.stopPropagation(); // prevent click from propagating to svg and deselecting probe
+                // select all probes in the clicked probeset
+                const probesInSet = this.gene.probes[d].map((probe) => probe.id);
+                this.select({ probesetId: d, probeIds: probesInSet }, true); // zoom into selected probeset
+            });
+
+        // correctly color the probes according to the current selection
+        this.select(this.selection);
+
+        // update probes according to the current zoom transform
+        zoomed(
+            { transform: this.context.currentZoomTransform } as d3.D3ZoomEvent<SVGGElement, unknown>,
+            this.context,
+            this.gene,
+            this.selection,
+            this.visibleProbesetIds
+        );
     }
 
     /**
      * Updates the currently selected probe in the visualization.
      * 
-     * @param selectedProbeId The currently selected probe, or null if no probe is selected.
-     * @param zoomIntoProbe A boolean indicating whether to smoothly zoom into the selected probe. Defaults to false.
+     * @param selection The selected probe and probeset.
+     * @param zoomIntoProbes A boolean indicating whether to smoothly zoom into the selected probe. Defaults to false.
      */
-    public selectProbe(selectedProbeId: string | null, zoomIntoProbe: boolean = false) {
-        this.selectedProbeId = selectedProbeId;
+    public select(selection: ProbeSelection, zoomIntoProbes: boolean = false) {
+        this.selection = selection;
 
-        const selectedProbe = selectedProbeId
-            ? Object.values(this.gene.probes)
-                .flat()
-                .find((probe) => probe.id === selectedProbeId)
-            : null;
+        const selectedProbes = Object.values(this.gene.probes)
+            .flat()
+            .filter((probe) => selection.probeIds.includes(probe.id));
 
         // Update probe colors based on selection
         this.context.probesGroup
@@ -801,9 +949,9 @@ class GeneViewerVisualization {
             .selectAll("g.components")
             .selectAll<SVGRectElement, ProbePosition>("rect")
             .attr("fill", (d) =>
-                d.id === selectedProbeId ? "orange" : "steelblue"
+                selection.probeIds.includes(d.id) ? "orange" : "steelblue"
             )
-            .filter((d) => d.id === selectedProbeId)
+            .filter((d) => selection.probeIds.includes(d.id))
             .raise();
 
         this.context.probesGroup
@@ -811,46 +959,48 @@ class GeneViewerVisualization {
             .selectAll("g.probes")
             .selectAll<SVGRectElement, Probe>("rect")
             .attr("fill", (d) =>
-                d.id === selectedProbeId ? "orange" : "steelblue"
+                selection.probeIds.includes(d.id) ? "orange" : "steelblue"
             )
-            .filter((d) => d.id === selectedProbeId)
+            .filter((d) => selection.probeIds.includes(d.id))
             .raise();
 
         // Update transcript markers based on selection
         this.context.svg
             .selectAll<SVGRectElement, string>(".transcript-marker")
             .attr("fill", (d) => {
-                if (selectedProbe) {
-                    const isSelected = selectedProbe.transcript_ids.includes(d);
+                if (selectedProbes.length > 0) {
+                    const isSelected = selectedProbes.some((probe) => probe.transcript_ids.includes(d));
                     return isSelected ? "#22bd28" : "#b0b0b0";
                 }
                 return "transparent";
             })
-            .attr("display", selectedProbeId ? "block" : "none");
+            .attr("display", selection.probeIds.length > 0 ? "block" : "none");
         
         // If zoomIntoProbe is true, smoothly zoom and pan to center the selected probe
-        if (selectedProbe && zoomIntoProbe) {
+        if (selectedProbes.length > 0 && zoomIntoProbes) {
+            const selectionStart = Math.min(...selectedProbes.map((probe) => probe.start));
+            const selectionEnd = Math.max(...selectedProbes.map((probe) => probe.end));
             // Smoothly zoom and pan to center the selected probe
             const zoomScale = Math.min(
-                (WIDTH /
-                    (this.context.xScale(selectedProbe.end) -
-                        this.context.xScale(selectedProbe.start))) *
+                (this.context.scaledWidth /
+                    (this.context.xScale(selectionEnd) -
+                        this.context.xScale(selectionStart))) *
                 0.9, // add some padding
                 this.context.zoomBehavior.scaleExtent()[1] // don't exceed max zoom
             );
-            this.context.svg
+            this.context.plot
                 .transition()
                 .duration(2500)
                 .ease(d3.easeCubicInOut)
                 .call(
                     this.context.zoomBehavior.transform,
                     d3.zoomIdentity
-                        .translate(WIDTH / 2, 0)
+                        .translate(this.context.scaledWidth / 2, 0)
                         .scale(zoomScale)
                         .translate(
                             -(
-                                (this.context.xScale(selectedProbe.start) +
-                                    this.context.xScale(selectedProbe.end)) /
+                                (this.context.xScale(selectionStart) +
+                                    this.context.xScale(selectionEnd)) /
                                 2
                             ),
                             0
@@ -858,13 +1008,15 @@ class GeneViewerVisualization {
                 );
         }
 
-        setupZoom(this.context, this.gene, selectedProbeId);
+        drawLegend(this.context.legendGroup, this.gene, selection);
+        setupZoom(this.context, this.gene, this.selection, this.visibleProbesetIds);
         // trigger a zoom event to update to update according to the new zoom (selected probe changed => different probe bases to show)
         zoomed(
-            { transform: this.context.currentZoomTransform } as d3.D3ZoomEvent<SVGElement, unknown>,
+            { transform: this.context.currentZoomTransform } as d3.D3ZoomEvent<SVGGElement, unknown>,
             this.context,
             this.gene,
-            selectedProbeId
+            this.selection,
+            this.visibleProbesetIds
         );
     }
 

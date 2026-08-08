@@ -15,8 +15,8 @@ export class GeneListAutocomplete extends LitElement {
         .autocomplete-input {
             padding: 0.5rem;
             box-sizing: border-box;
-            background-color: var(--gene-viewer-background-color, #fff);
-            border: 1px solid var(--gene-viewer-border-color, #888);
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
             border-radius: 0.3rem;
             color: inherit;
             width: 100%;
@@ -24,8 +24,8 @@ export class GeneListAutocomplete extends LitElement {
 
         .autocomplete-list {
             position: absolute;
-            background-color: var(--gene-viewer-background-color, #fff);
-            border: 1px solid var(--gene-viewer-border-color, #888);
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
             border-radius: 0.3rem;
             max-height: 15rem;
             overflow-y: auto;
@@ -37,13 +37,17 @@ export class GeneListAutocomplete extends LitElement {
         .autocomplete-item {
             cursor: pointer;
             list-style-type: none;
-            padding: 5px 20px;
+            padding: 0.5rem 1.5rem;
         }
-        .autocomplete-item:hover {
+        .autocomplete-item:not(.disabled):hover {
             background-color: #f0f0f0;
         }
         .autocomplete-item.highlighted {
             background-color: #e0e0e0;
+        }
+        .autocomplete-item.disabled {
+            opacity: 0.5;
+            cursor: default;
         }
     `;
 
@@ -57,6 +61,9 @@ export class GeneListAutocomplete extends LitElement {
 
     @state()
     protected _filteredGeneList: string[] = [];
+
+    @state()
+    protected _isGeneListOverflowing: boolean = false;
 
     @state()
     protected _inputValue: string = '';
@@ -84,17 +91,19 @@ export class GeneListAutocomplete extends LitElement {
     protected _filterGeneList() {
         if (this._inputValue.trim() === '') {
             this._filteredGeneList = [];
+            this._isGeneListOverflowing = false;
             return;
         }
         const lowerCaseInput = this._inputValue.toLowerCase();
-        this._filteredGeneList = this.geneList
-            .filter(geneId => geneId.toLowerCase().includes(lowerCaseInput))
-            .slice(0, 100);
+        const filtered = this.geneList.filter(geneId => geneId.toLowerCase().includes(lowerCaseInput));
+        this._isGeneListOverflowing = filtered.length > 100;
+        this._filteredGeneList = filtered.slice(0, 100); // limit to 100 results
     }
 
     protected _onGeneSelect(geneId: string) {
         this._inputValue = geneId;
         this._filteredGeneList = [];
+        this._isGeneListOverflowing = false;
         this._highlightedIndex = -1;
         const inputElement = this.shadowRoot?.querySelector('input') as HTMLInputElement;
         if (inputElement) {
@@ -122,6 +131,8 @@ export class GeneListAutocomplete extends LitElement {
             }
             if (event.key === 'Escape') {
                 this._filteredGeneList = [];
+                this._highlightedIndex = -1;
+                this._isGeneListOverflowing = false;
             }
             if (event.key === 'ArrowDown' && this._filteredGeneList.length > 0) {
                 event.preventDefault();
@@ -136,6 +147,7 @@ export class GeneListAutocomplete extends LitElement {
             setTimeout(() => {
                 this._filteredGeneList = [];
                 this._highlightedIndex = -1;
+                this._isGeneListOverflowing = false;
             }, 100);
         })
     }
@@ -182,6 +194,7 @@ export class GeneListAutocomplete extends LitElement {
                             @click="${() => this._onGeneSelect(geneId)}">${geneId}
                         </li>`
                     )}
+                    ${(this._isGeneListOverflowing) ? html`<li class="autocomplete-item disabled">More results available. Please refine your search.</li>` : ''}
                 </ul>
             </div>
         `;

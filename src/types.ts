@@ -21,9 +21,10 @@ export interface Probes {
 export interface Region {
     start: number;
     end: number;
-    strand: string;
     type: string;
+    strand?: string;
     description?: string;
+    exon_number?: number;
 }
 
 export interface Regions {
@@ -40,7 +41,9 @@ export type Sequences = Sequence[];
 export interface Feature {
     start: number;
     end: number;
-    transcript_ids?: string[];
+    weight?: number;
+    itemRgb?: string;
+    // TODO: transcript_ids?: string[];
     description?: string;
 }
 
@@ -59,3 +62,8 @@ export interface Gene {
     sequences: Sequences;
     tracks: Tracks;
 }
+
+export type ProbeSelection = {
+    probesetId: string | null;
+    probeIds: string[];
+};
