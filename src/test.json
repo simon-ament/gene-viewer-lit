@@ -3,6 +3,9 @@
     "source": "NCBI",
     "species": "Homo_sapiens",
     "strand": "-",
+    "seq_id": "chrom1",
+    "start": "70252358",
+    "end": "70270290",
     "probes": {
         "Oligoset 1": [
             {

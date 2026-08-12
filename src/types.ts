@@ -41,9 +41,8 @@ export type Sequences = Sequence[];
 export interface Feature {
     start: number;
     end: number;
-    weight?: number;
-    itemRgb?: string;
-    // TODO: transcript_ids?: string[];
+    opacity?: number;
+    item_rgb?: string;
     description?: string;
 }
 
@@ -55,8 +54,14 @@ export interface Tracks {
 
 export interface Gene {
     id: string;
+    seq_id: string;
+    start: number;
+    end: number;
+    strand: "+" | "-";
+
     species: string | null;
     source: string | null;
+    
     probes: Probes;
     regions: Regions;
     sequences: Sequences;
@@ -66,4 +71,9 @@ export interface Gene {
 export type ProbeSelection = {
     probesetId: string | null;
     probeIds: string[];
+};
+
+export type ProbeSetData = { 
+    probesetId: string;
+    probes: Probe[]
 };

@@ -294,7 +294,10 @@ export const exportSVG = (
         svgStringWithComputedStyles = svgStringWithComputedStyles.replace(regex, value);
     });
 
-    // TODO: embed fonts?
+    // replace font-family with computed value
+    const fontFamily = computedStyles.getPropertyValue("font-family").replace(/"/g, "'").trim();
+    svgStringWithComputedStyles = svgStringWithComputedStyles.replace(/font-family="[^"]*"/g, `font-family="${fontFamily}"`);
+    svgStringWithComputedStyles = svgStringWithComputedStyles.replace(/font-family:[^;"]*;/g, `font-family: ${fontFamily};`);
 
     const blob = new Blob([svgStringWithComputedStyles], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);

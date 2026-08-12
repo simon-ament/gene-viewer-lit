@@ -38,6 +38,13 @@ class GeneViewerBase extends LitElement {
         font-weight: normal;
     }
 
+    .export-button svg {
+        width: 1rem;
+        height: 1rem;
+        vertical-align: middle;
+        margin-right: 0.2rem;
+    }
+
     .probeset-selectors {
         display: flex;
         gap: 1rem;
@@ -52,8 +59,15 @@ class GeneViewerBase extends LitElement {
         border-radius: 0.3rem;
     }
 
-    .controls-container {
+    .relative-container {
         position: relative;
+    }
+
+    .controls-container > h3 {
+        margin: 0;
+        margin-bottom: 0.4rem;
+        font-size: 0.9rem;
+        font-weight: bold;
     }
 
     .controls {
@@ -62,6 +76,16 @@ class GeneViewerBase extends LitElement {
         right: 0;
         display: flex;
         gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+        .controls {
+            position: static;
+            flex-direction: column;
+            gap: 0;
+            margin-bottom: 1rem;
+        }
+    }
     `;
 
     /* Properties */
@@ -220,33 +244,44 @@ class GeneViewerBase extends LitElement {
         const probesetIds = Object.keys(this._gene.probes);
 
         return html`
-            <div class="probeset-selectors">
-                ${map(range, (index) => html`
-                    <select @change=${(e: Event) => {
-                        const selectElement = e.target as HTMLSelectElement;
-                        const selectedId = selectElement.value;
-                        const newVisibleProbesets = [...this._visibleProbesetIds];
-                        newVisibleProbesets[index] = selectedId;
-                        this.showProbesets(newVisibleProbesets);
-                    }}>
-                        ${map(probesetIds, (probesetId) => html`
-                            <option .selected=${probesetId === this._visibleProbesetIds[index]} value=${probesetId}>${probesetId}</option>
-                        `)}
-                    </select>
-                `)}
+            <div class="controls-container">
+                <h3>Select Probsets</h3>
+                <div class="probeset-selectors">
+                    ${map(range, (index) => html`
+                        <select @change=${(e: Event) => {
+                            const selectElement = e.target as HTMLSelectElement;
+                            const selectedId = selectElement.value;
+                            const newVisibleProbesets = [...this._visibleProbesetIds];
+                            newVisibleProbesets[index] = selectedId;
+                            this.showProbesets(newVisibleProbesets);
+                        }}>
+                            ${map(probesetIds, (probesetId) => html`
+                                <option .selected=${probesetId === this._visibleProbesetIds[index]} value=${probesetId}>${probesetId}</option>
+                            `)}
+                        </select>
+                    `)}
+                </div>
             </div>
         `
     }
 
     renderExportButton() {
         return html`
-            <button class="export-button" @click=${() => this._visualization?.export()}>Export SVG</button>
+            <div class="controls-container">
+                <h3>Export</h3>
+                <button class="export-button" @click=${() => this._visualization?.export()}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    SVG
+                </button>
+            </div>
         `;
     }
 
     renderControls() {
         return html`
-            <div class="controls-container">
+            <div class="relative-container">
                 <div class="controls">
                 ${this.renderProbesetSelectors()}
                 ${this.renderExportButton()}
@@ -360,17 +395,20 @@ export class GeneViewer extends GeneViewerBase {
         }
 
         return html`
-            <gene-list-autocomplete
-                .selectedGene=${this._geneId}
-                .geneList=${this._geneList}
-                @gene-selected=${(e: CustomEvent) => this.showGene(e.detail.geneId)}
-            ></gene-list-autocomplete>
+            <div class="controls-container">
+                <h3>Select Gene</h3>
+                <gene-list-autocomplete
+                    .selectedGene=${this._geneId}
+                    .geneList=${this._geneList}
+                    @gene-selected=${(e: CustomEvent) => this.showGene(e.detail.geneId)}
+                ></gene-list-autocomplete>
+            </div>
         `;
     }
 
     renderControls() {
         return html`
-            <div class="controls-container">
+            <div class="relative-container">
                 <div class="controls">
                     ${this.renderGeneListAutocomplete()}
                     ${this.renderProbesetSelectors()}

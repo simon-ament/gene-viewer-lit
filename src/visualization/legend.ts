@@ -1,53 +1,68 @@
 import { Gene, ProbeSelection } from "../types.js";
 import { RegionMap } from "../constants.js";
-import { PADDING_LEFT } from "../visualization.js";
+import { PADDING_LEFT, PADDING_TOP, VisualizationContext } from "../visualization.js";
 
-export const drawLegend = (
-    legendGroup: d3.Selection<SVGGElement, unknown, null, unknown>,
+export const drawHeader = (
+    headerGroup: d3.Selection<SVGGElement, unknown, null, unknown>,
     gene: Gene,
-    selection: ProbeSelection
 ) => {
-    // remove any existing legend items
-    legendGroup.selectAll("*").remove();
-
     // Legend group for probe types and region types
-    legendGroup
-        .attr("transform", `translate(${PADDING_LEFT}, 0)`)
+    headerGroup
+        .attr("transform", `translate(${PADDING_LEFT}, 15)`)
 
     // Header for legend (gene name, species, source)
-    legendGroup
+    headerGroup
         .append("text")
-        .attr("y", 15)
+        .attr("y", 0)
         .attr("font-size", "16px")
         .attr("font-weight", "bold")
         .text(`Gene: ${gene.id}`);
 
-    legendGroup
+    headerGroup
         .append("text")
-        .attr("y", 25)
+        .attr("y", 14)
         .attr("font-size", "8px")
-        .text(`Species: ${gene.species || "N/A"}`);
+        .text(`Species: ${gene.species || "N/A"} | Source: ${gene.source || "N/A"}`);
 
-    legendGroup
+    headerGroup
         .append("text")
-        .attr("y", 35)
+        .attr("y", 26)
         .attr("font-size", "8px")
-        .text(`Source: ${gene.source || "N/A"}`);
+        .text(`Location: ${gene.seq_id}:${gene.start}-${gene.end}`);
 
-    legendGroup
+    headerGroup
         .append("text")
-        .attr("y", 50)
+        .attr("y", 38)
+        .attr("font-size", "8px")
+        .text(`Strand: ${gene.strand}`);
+}
+
+export const drawFooter = (
+    footerGroup: d3.Selection<SVGGElement, unknown, null, unknown>,
+    gene: Gene,
+    selection: ProbeSelection,
+    context: VisualizationContext
+) => {
+    // remove any existing legend items
+    footerGroup.selectAll("*").remove();
+
+    // Legend group for probe types and region types
+    footerGroup
+        .attr("transform", `translate(${PADDING_LEFT}, ${context.height + PADDING_TOP + 30})`)
+
+    footerGroup
+        .append("text")
+        .attr("y", 0)
         .attr("font-size", "8px")
         .attr("font-weight", "bold")
-        .text("Probes");
+        .text("Probes:");
 
-    legendGroup
+    footerGroup
         .append("text")
-        .attr("x", 170)
-        .attr("y", 50)
+        .attr("y", 15)
         .attr("font-size", "8px")
         .attr("font-weight", "bold")
-        .text("Regions");
+        .text("Regions:");
 
     // create legend items for probes
     const probeLegendItems = [
@@ -67,50 +82,54 @@ export const drawLegend = (
         });
     }
 
-    const probeItems = legendGroup
-        .selectAll(".probe-item")
-        .data(probeLegendItems)
-        .enter()
-        .append("g")
-        .attr("class", "probe-item")
-        .attr("transform", (d, i) => `translate(${Math.floor(i / 3) * 12}, ${60 + i % 3 * 14})`);
+    let widthOffset = 0;
+    for (const probeLegendItem of probeLegendItems) {
+        const probeItem = footerGroup
+            .append("g")
+            .attr("class", "probe-item")
+            .attr("transform", `translate(${40 + widthOffset}, 0)`)
 
-    probeItems
-        .append("rect")
-        .attr("width", 6)
-        .attr("height", 6)
-        .attr("fill", (d) => d.color);
-        
-    probeItems
-        .append("text")
-        .attr("x", 10)
-        .attr("y", 6)
-        .attr("font-size", "8px")
-        .text((d) => d.label);
+        probeItem
+            .append("rect")
+            .attr("y", -6)
+            .attr("width", 6)
+            .attr("height", 6)
+            .attr("fill", probeLegendItem.color);
+
+        const probeText = probeItem
+            .append("text")
+            .attr("x", 10)
+            .attr("font-size", "8px")
+            .text(probeLegendItem.label);
+
+        widthOffset += probeText.node()!.getBBox().width + 20;
+    }
 
     // create legend items for each region type
     const visibleRegionTypes = Object.keys(RegionMap).filter((regionType) => {
         return gene.regions && Object.values(gene.regions).some((regions) => regions.some((region) => region.type === regionType));
     });
 
-    const regionItems = legendGroup
-        .selectAll(".region-item")
-        .data(visibleRegionTypes)
-        .enter()
-        .append("g")
-        .attr("class", "region-item")
-        .attr("transform", (d, i) => `translate(${170 + Math.floor(i / 3) * 12}, ${60 + i % 3 * 14})`);
+    widthOffset = 0;
+    for (const regionType of visibleRegionTypes) {
+        const regionItem = footerGroup
+            .append("g")
+            .attr("class", "region-item")
+            .attr("transform", `translate(${40 + widthOffset}, 15)`)
 
-    regionItems
-        .append("rect")
-        .attr("width", 6)
-        .attr("height", 6)
-        .attr("fill", (d) => RegionMap[d].color);
+        regionItem
+            .append("rect")
+            .attr("y", -6)
+            .attr("width", 6)
+            .attr("height", 6)
+            .attr("fill", RegionMap[regionType].color);
 
-    regionItems
-        .append("text")
-        .attr("x", 15)
-        .attr("y", 6)
-        .attr("font-size", "8px")
-        .text((d) => RegionMap[d].label);
+        const regionText = regionItem
+            .append("text")
+            .attr("x", 10)
+            .attr("font-size", "8px")
+            .text(RegionMap[regionType].label);
+
+        widthOffset += regionText.node()!.getBBox().width + 20;
+    }
 }

@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import type { Region, Probe, Gene, Feature, Sequence, ProbeSelection } from "./types.js";
+import type { Region, Probe, Gene, Feature, Sequence, ProbeSelection, ProbeSetData } from "./types.js";
 import {
     calculateArrowSpacing,
     centeredMinWidthRect,
@@ -15,7 +15,7 @@ import {
     type ProbePosition,
 } from "./helpers.js";
 import { RegionMap } from "./constants.js";
-import { drawLegend } from "./visualization/legend.js";
+import { drawHeader, drawFooter } from "./visualization/legend.js";
 import { updateLocationIndicator } from "./visualization/location-indicator.js";
 
 export type VisualizationContext = {
@@ -28,7 +28,8 @@ export type VisualizationContext = {
     locationIndicator: d3.Selection<SVGRectElement, unknown, null, unknown>;
     locationIndicatorPosition: number;
     positionLabelGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
-    legendGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
+    headerGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
+    footerGroup: d3.Selection<SVGGElement, unknown, null, unknown>;
     tooltip: d3.Selection<HTMLDivElement, unknown, null, unknown>;
     xScale: d3.ScaleLinear<number, number>;
     xAxis: d3.Selection<SVGGElement, unknown, null, unknown>;
@@ -52,8 +53,8 @@ const AXIS_HEIGHT = 20;
 const MIN_PROBE_WIDTH = 2;
 export const PADDING_LEFT = 70;
 const PADDING_RIGHT = 0;
-const PADDING_TOP = 120;
-const PADDING_BOTTOM = 0;
+export const PADDING_TOP = 70;
+const PADDING_BOTTOM = 50;
 
 /**
  * Creates the D3 visualization context by creating the necessary SVG elements and groups.
@@ -94,7 +95,8 @@ const createContext = (
     const tracksGroup = plot.append("g").attr("class", "tracks");
     const regionsGroup = plot.append("g").attr("class", "genomic-regions");
     const baseGroup = plot.append("g").attr("class", "reference-bases");
-    const legendGroup = svg.append("g").attr("class", "legend");
+    const headerGroup = svg.append("g").attr("class", "header");
+    const footerGroup = svg.append("g").attr("class", "footer");
     const tooltip = d3.select(el).append("div").attr("id", "region-tooltip");
 
     const zoomBehavior = d3.zoom() as d3.ZoomBehavior<SVGGElement, unknown>;
@@ -116,7 +118,8 @@ const createContext = (
         locationIndicator,
         locationIndicatorPosition: 0,
         positionLabelGroup,
-        legendGroup,
+        headerGroup,
+        footerGroup,
         tooltip,
         xScale,
         xAxis,
@@ -180,7 +183,9 @@ const setupElements = (
         .attr("viewBox", [0, 0, context.svgWidth, context.svgHeight])
         .attr("width", context.svgWidth)
         .attr("height", context.svgHeight)
-        .attr("style", "width: 100%; height: auto;");
+        .style("width", "100%")
+        .style("height", "auto")
+        .style("font-family", "inherit");
 
     context.plot
         .attr("transform", `translate(${PADDING_LEFT}, ${PADDING_TOP})`)
@@ -391,6 +396,8 @@ const setupElements = (
             .join("rect")
             .attr("class", "track-feature")
             .attr("x", (d: Feature) => context.xScale(d.start - 0.5))
+            .attr("fill", (d: Feature) => d.item_rgb || "black")
+            .attr("opacity", (d: Feature) => d.opacity ?? 1)
             .attr("width", (d: Feature) => context.xScale(d.end + 0.5) - context.xScale(d.start - 0.5))
             .on("mouseover", function (_, d: Feature) {
                 context.tooltip
@@ -422,7 +429,8 @@ const setupElements = (
             .attr("title", trackName); // show full name on hover
     });
 
-    drawLegend(context.legendGroup, gene, { probesetId: null, probeIds: [] });
+    drawHeader(context.headerGroup, gene);
+    drawFooter(context.footerGroup, gene, { probesetId: null, probeIds: [] }, context);
 };
 
 /**
@@ -783,7 +791,6 @@ class GeneViewerVisualization {
      */
     public showProbesets(visibleProbesets: string[]) {
         this.visibleProbesetIds = visibleProbesets.slice(0, this.parallelProbesets); // limit to the number of parallel probesets
-        type ProbeSetData = { probesetId: string; probes: Probe[] };
 
         const probesets: ProbeSetData[] = [];
         for (const visibleProbesetId of this.visibleProbesetIds) {
@@ -802,7 +809,7 @@ class GeneViewerVisualization {
         
         // horizontal probeset track line
         probesetTracks
-            .selectAll<SVGLineElement, ProbeSetData>("line.track-line")
+            .selectAll("line.track-line")
             .data((d) => [d])
             .join("line")
             .attr("class", "track-line")
@@ -810,9 +817,9 @@ class GeneViewerVisualization {
             .attr("x2", this.context.scaledWidth)
             .attr("y1", PROBE_HEIGHT / 2 - 0.5)
             .attr("y2", PROBE_HEIGHT / 2 - 0.5)
-            .attr("stroke", "contrast-color(var(--background-color))")
+            .attr("stroke", (d) => (this.selection.probesetId === d.probesetId ? "orange" : "var(--border-color)"))
             .attr("stroke-width", 1)
-            .attr("opacity", 0.2);
+            .attr("opacity", 0.5);
 
         // Draw probe components (probes and gaps)
         probesetTracks
@@ -907,7 +914,7 @@ class GeneViewerVisualization {
             .attr("dominant-baseline", "middle")
             .attr("font-size", 8)
             .attr("cursor", "pointer")
-            .attr("fill", "var(--text-color)")
+            .attr("fill", (d) => (this.selection.probesetId === d ? "orange" : "var(--text-color)"))
             .text((d) => d.slice(0, 10) + (d.length > 10 ? "..." : "")) // truncate long names
             .attr("title", (d) => d) // show full name on hover
             .on("click", (event, d) => {
@@ -964,6 +971,19 @@ class GeneViewerVisualization {
             .filter((d) => selection.probeIds.includes(d.id))
             .raise();
 
+        this.context.probesGroup
+            .selectAll("g.probeset-track")
+            .selectAll<SVGLineElement, ProbeSetData>("line.track-line")
+            .attr("stroke", (d) =>
+                selection.probesetId === d.probesetId ? "orange" : "var(--border-color)"
+            );
+
+        this.context.svg
+            .selectAll<SVGTextElement, string>(".y-axis-label-probeset")
+            .attr("fill", (d) =>
+                selection.probesetId === d ? "orange" : "var(--text-color)"
+            );
+
         // Update transcript markers based on selection
         this.context.svg
             .selectAll<SVGRectElement, string>(".transcript-marker")
@@ -1008,7 +1028,7 @@ class GeneViewerVisualization {
                 );
         }
 
-        drawLegend(this.context.legendGroup, this.gene, selection);
+        drawFooter(this.context.footerGroup, this.gene, selection, this.context);
         setupZoom(this.context, this.gene, this.selection, this.visibleProbesetIds);
         // trigger a zoom event to update to update according to the new zoom (selected probe changed => different probe bases to show)
         zoomed(
