@@ -1,6 +1,5 @@
 import { Gene, ProbeSelection } from "../types.js";
-import { RegionMap } from "../constants.js";
-import { PADDING_LEFT, PADDING_TOP, VisualizationContext } from "../visualization.js";
+import { PADDING_TOP, VisualizationContext } from "../visualization.js";
 
 export const drawHeader = (
     headerGroup: d3.Selection<SVGGElement, unknown, null, unknown>,
@@ -8,32 +7,36 @@ export const drawHeader = (
 ) => {
     // Legend group for probe types and region types
     headerGroup
-        .attr("transform", `translate(${PADDING_LEFT}, 15)`)
+        .attr("transform", `translate(0, 15)`)
 
     // Header for legend (gene name, species, source)
     headerGroup
         .append("text")
         .attr("y", 0)
-        .attr("font-size", "16px")
+        .attr("font-size", "20px")
         .attr("font-weight", "bold")
+        .attr("fill", "var(--text-color, #000)")
         .text(`Gene: ${gene.id}`);
 
     headerGroup
         .append("text")
-        .attr("y", 14)
-        .attr("font-size", "8px")
+        .attr("y", 15)
+        .attr("font-size", "10px")
+        .attr("fill", "var(--text-color, #000)")
         .text(`Species: ${gene.species || "N/A"} | Source: ${gene.source || "N/A"}`);
 
     headerGroup
         .append("text")
-        .attr("y", 26)
-        .attr("font-size", "8px")
+        .attr("y", 28)
+        .attr("font-size", "10px")
+        .attr("fill", "var(--text-color, #000)")
         .text(`Location: ${gene.seq_id}:${gene.start}-${gene.end}`);
 
     headerGroup
         .append("text")
-        .attr("y", 38)
-        .attr("font-size", "8px")
+        .attr("y", 41)
+        .attr("font-size", "10px")
+        .attr("fill", "var(--text-color, #000)")
         .text(`Strand: ${gene.strand}`);
 }
 
@@ -48,20 +51,22 @@ export const drawFooter = (
 
     // Legend group for probe types and region types
     footerGroup
-        .attr("transform", `translate(${PADDING_LEFT}, ${context.height + PADDING_TOP + 30})`)
+        .attr("transform", `translate(0, ${context.height + PADDING_TOP + 30})`)
 
     footerGroup
         .append("text")
         .attr("y", 0)
-        .attr("font-size", "8px")
+        .attr("font-size", "10px")
         .attr("font-weight", "bold")
+        .attr("fill", "var(--text-color, #000)")
         .text("Probes:");
 
     footerGroup
         .append("text")
         .attr("y", 15)
-        .attr("font-size", "8px")
+        .attr("font-size", "10px")
         .attr("font-weight", "bold")
+        .attr("fill", "var(--text-color, #000)")
         .text("Regions:");
 
     // create legend items for probes
@@ -87,7 +92,7 @@ export const drawFooter = (
         const probeItem = footerGroup
             .append("g")
             .attr("class", "probe-item")
-            .attr("transform", `translate(${40 + widthOffset}, 0)`)
+            .attr("transform", `translate(${50 + widthOffset}, 0)`)
 
         probeItem
             .append("rect")
@@ -99,14 +104,15 @@ export const drawFooter = (
         const probeText = probeItem
             .append("text")
             .attr("x", 10)
-            .attr("font-size", "8px")
+            .attr("font-size", "10px")
+            .attr("fill", "var(--text-color, #000)")
             .text(probeLegendItem.label);
 
         widthOffset += probeText.node()!.getBBox().width + 20;
     }
 
     // create legend items for each region type
-    const visibleRegionTypes = Object.keys(RegionMap).filter((regionType) => {
+    const visibleRegionTypes = Object.keys(context.regionMap).filter((regionType) => {
         return gene.regions && Object.values(gene.regions).some((regions) => regions.some((region) => region.type === regionType));
     });
 
@@ -115,20 +121,21 @@ export const drawFooter = (
         const regionItem = footerGroup
             .append("g")
             .attr("class", "region-item")
-            .attr("transform", `translate(${40 + widthOffset}, 15)`)
+            .attr("transform", `translate(${50 + widthOffset}, 15)`)
 
         regionItem
             .append("rect")
             .attr("y", -6)
             .attr("width", 6)
             .attr("height", 6)
-            .attr("fill", RegionMap[regionType].color);
+            .attr("fill", context.regionMap[regionType].color);
 
         const regionText = regionItem
             .append("text")
             .attr("x", 10)
-            .attr("font-size", "8px")
-            .text(RegionMap[regionType].label);
+            .attr("font-size", "10px")
+            .attr("fill", "var(--text-color, #000)")
+            .text(context.regionMap[regionType].label);
 
         widthOffset += regionText.node()!.getBBox().width + 20;
     }

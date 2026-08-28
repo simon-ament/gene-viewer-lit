@@ -1,4 +1,6 @@
-export const RegionMap: { [key: string]: { color: string; label: string } } = {
+export type RegionMap = { [key: string]: { color: string; label: string } };
+
+export const defaultRegionMap: RegionMap = {
     exon: { color: "blue", label: "Exon" },
     intron: { color: "red", label: "Intron" },
     intron_CNS: { color: "lightgray", label: "Intron CNS" },

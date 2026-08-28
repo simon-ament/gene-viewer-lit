@@ -20,21 +20,16 @@
   </style>
 </head>
 <body>
-  <div id="demo"></div>
+  <div id="demo">
+      <gene-viewer-custom parallelProbesets="3" scaleFactor="1"></gene-viewer-custom>
+      <div style="height: 20rem;"></div>
+      <gene-viewer viewerServer="http://localhost:5000/api/visualization" parallelProbesets="0" viewerId="homo_sapiens"></gene-viewer>
+  </div>
 
   <script type="module">
-    import { html, render } from 'lit';
     import '../dist/src/gene-viewer.js';
     import TestData from '../src/test.json' with { type: 'json' };
 
-    render(
-      html`
-        <gene-viewer-custom parallelProbesets="3" scaleFactor="1"></gene-viewer-custom>
-        <div style="height: 20rem;"></div>
-        <gene-viewer viewerServer="http://localhost:5000/api/visualization" parallelProbesets="0" viewerId="drosophilia"></gene-viewer>
-      `,
-      document.querySelector('#demo')
-    );
 
     const geneViewer = document.querySelector('gene-viewer-custom');
     geneViewer.setGene(TestData);

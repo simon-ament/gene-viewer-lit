@@ -3,12 +3,12 @@ export interface Probe {
     start: number;
     end: number;
     transcript_ids: string[];
-    description?: string;
-    sequence?: string; // mainly useful when no reference sequence is available
     locations: {
         start: number;
         end: number;
-    }[] | null; /* null if equal to the probe's start and end positions */
+    }[] | null; // null if equal to the probe's start and end positions
+    description?: string;
+    // sequence?: string; // mainly useful when no reference sequence is available
     metadata?: {
         [key: string]: string;
     };

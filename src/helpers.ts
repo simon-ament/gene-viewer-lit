@@ -1,5 +1,5 @@
 import type { Region, Regions, Probe, Gene, Probes, Feature } from "./types.js";
-import { RegionMap } from "./constants.js";
+import { VisualizationContext } from "./visualization.js";
 
 export type ProbePosition = {
     start: number;
@@ -43,10 +43,11 @@ export const probeTooltipHTML = (
  */
 export const regionTooltipHTML = (
     region: Region,
-    transcriptName: string
+    transcriptName: string,
+    context: VisualizationContext
 ) => {
     return (
-        RegionMap[region.type || "unknown"].label +
+        context.regionMap[region.type || "unknown"].label +
         (region.exon_number ? " " + region.exon_number : "") +
         (region.description ? `<br>${region.description}` : "") +
         (transcriptName !== "unknown"
@@ -85,8 +86,9 @@ export const transcriptTooltipHTML = (
  * @param feature The feature for which the tooltip is being generated.
  * @returns A string containing HTML content for the tooltip.
  */
-export const featureTooltipHTML = (feature: Feature) => {
+export const featureTooltipHTML = (feature: Feature, trackName: string) => {
     return (
+        `Track: ${trackName}<br>` +
         `Feature: ${feature.description || "unknown"}`
     );
 }
@@ -285,8 +287,6 @@ export const exportSVG = (
     const computedStyles = getComputedStyle(el);
     const cssVariables = Array.from(computedStyles).filter((prop) => prop.startsWith("--"));
     let svgStringWithComputedStyles = svgString;
-
-    console.log("CSS Variables:", cssVariables);
 
     cssVariables.forEach((variable) => {
         const value = computedStyles.getPropertyValue(variable).trim();

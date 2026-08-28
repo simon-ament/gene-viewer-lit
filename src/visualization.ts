@@ -37,10 +37,11 @@ export type VisualizationContext = {
     currentZoomTransform: d3.ZoomTransform;
     height: number;
     parallelProbesets: number;
-    softenedScaleFactor: number;
+    scaleFactor: number;
     scaledWidth: number;
     svgWidth: number;
     svgHeight: number;
+    regionMap: RegionMap;
 };
 
 const WIDTH = 800;
@@ -66,7 +67,8 @@ const createContext = (
     el: HTMLElement,
     gene: Gene,
     parallelProbesets: number,
-    scaleFactor: number
+    scaleFactor: number,
+    regionMap: RegionMap
 ): VisualizationContext => {
     const svg = d3.select(el).select("svg") as d3.Selection<SVGElement, unknown, null, unknown>;
     svg.append("rect")
@@ -78,11 +80,11 @@ const createContext = (
         Object.keys(gene.regions).length * TRANSCRIPT_HEIGHT +
         parallelProbesets * PROBE_HEIGHT +
         GAP +
-        AXIS_HEIGHT;
+        Object.keys(gene.tracks).length * TRACK_HEIGHT +
+        AXIS_HEIGHT
     const scaledWidth = WIDTH / scaleFactor;
     const svgWidth = scaledWidth + PADDING_LEFT + PADDING_RIGHT;
     const svgHeight = height + PADDING_TOP + PADDING_BOTTOM;
-    const softenedScaleFactor = 1 + (scaleFactor - 1) * 0.5;
 
     const plot = svg.append("g");
     plot.append("rect")
@@ -127,10 +129,11 @@ const createContext = (
         currentZoomTransform: d3.zoomIdentity,
         height,
         parallelProbesets,
-        softenedScaleFactor,
+        scaleFactor,
         scaledWidth,
         svgWidth,
         svgHeight,
+        regionMap
     };
 };
 
@@ -155,7 +158,7 @@ const setupScalesAndAxes = (
     context.xScale
         .domain([ext[0] - extentPadding, ext[1] + extentPadding])
         .range([0.5, context.scaledWidth - 0.5]);
-    const axis = d3.axisBottom(context.xScale).ticks(8 / context.softenedScaleFactor);
+    const axis = d3.axisBottom(context.xScale).ticks(8 / context.scaleFactor);
 
     // Append the x-axis in the outer SVG padding so it is not clipped by the plot
     context.xAxis
@@ -267,7 +270,7 @@ const setupElements = (
             )
             .on("mouseover", function (_, d: Region) {
                 context.tooltip
-                    .html(regionTooltipHTML(d, transcriptName))    
+                    .html(regionTooltipHTML(d, transcriptName, context))    
                     .style("opacity", 1);
             })
             .on("mousemove mousemove-forwarded", (event) => {
@@ -315,7 +318,7 @@ const setupElements = (
             .attr(
                 "fill",
                 (d: Region) =>
-                    RegionMap[d.type || "unknown"].color || "lightgray"
+                    context.regionMap[d.type || "unknown"].color || "lightgray"
             );
 
         // Padding container for intron hovering
@@ -371,9 +374,9 @@ const setupElements = (
             .attr("y", PADDING_TOP + yOffset + TRANSCRIPT_HEIGHT / 2)
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", 8)
+            .attr("font-size", 10)
             .attr("fill", "var(--text-color)")
-            .text(transcriptName.slice(0, 10) + (transcriptName.length > 10 ? "..." : "")) // truncate long names
+            .text(transcriptName.slice(0, 8) + (transcriptName.length > 8 ? "..." : "")) // truncate long names
             .attr("title", transcriptName); // show full name on hover
     });
 
@@ -399,16 +402,28 @@ const setupElements = (
             .attr("fill", (d: Feature) => d.item_rgb || "black")
             .attr("opacity", (d: Feature) => d.opacity ?? 1)
             .attr("width", (d: Feature) => context.xScale(d.end + 0.5) - context.xScale(d.start - 0.5))
+            .attr("height", TRACK_HEIGHT - 2)
             .on("mouseover", function (_, d: Feature) {
                 context.tooltip
-                    .html(featureTooltipHTML(d))
+                    .html(featureTooltipHTML(d, trackName))
                     .style("opacity", 1);
             })
             .on("mousemove mousemove-forwarded", (event) => {
                 const xPos = event instanceof MouseEvent ? event.pageX : event.detail.pageX;
                 const yPos = event instanceof MouseEvent ? event.pageY : event.detail.pageY;
                 context.tooltip
-                    .style("left", xPos + 20 + "px")
+                    .style(
+                        "left",
+                        xPos > window.innerWidth / 2
+                            ? ""
+                            : xPos + 20 + "px"
+                    )
+                    .style(
+                        "right",
+                        xPos > window.innerWidth / 2
+                            ? window.innerWidth - xPos + 10 + "px"
+                            : ""
+                    )
                     .style("top", yPos + "px")
                     .style("bottom", ""); // reset bottom in case it was set before
             })
@@ -423,9 +438,9 @@ const setupElements = (
             .attr("y", PADDING_TOP + yOffset + TRACK_HEIGHT / 2)
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", 8)
+            .attr("font-size", 10)
             .attr("fill", "var(--text-color)")
-            .text(trackName.slice(0, 10) + (trackName.length > 10 ? "..." : "")) // truncate long names
+            .text(trackName.slice(0, 8) + (trackName.length > 8 ? "..." : "")) // truncate long names
             .attr("title", trackName); // show full name on hover
     });
 
@@ -487,8 +502,8 @@ const setupZoom = (
     context.zoomBehavior
         .scaleExtent([
             1,
-            (context.xScale.domain()[1] - context.xScale.domain()[0]) / 100,
-        ]) // max zoom to 100bp width
+            (context.xScale.domain()[1] - context.xScale.domain()[0]) / (100 / context.scaleFactor),
+        ]) // max zoom to 100bp width on default scale
         .translateExtent(extent)
         .extent(extent)
         .on("zoom", (e) => zoomed(e, context, gene, selection, visibleProbesetIds));
@@ -574,7 +589,7 @@ const zoomed = (
         );
 
     // Rescale x axis
-    const axis = d3.axisBottom(zx).ticks(8 / context.softenedScaleFactor);
+    const axis = d3.axisBottom(zx).ticks(8 / context.scaleFactor);
     context.xAxis.call(axis);
 
     // Rescale genomic regions
@@ -597,8 +612,8 @@ const zoomed = (
     // Calculate visible range
     const domain = zx.domain();
     const visibleRange = domain[1] - domain[0];
-    const showBases = visibleRange <= 120 / context.softenedScaleFactor;
-    const showArrows = visibleRange <= 3000 / context.softenedScaleFactor;
+    const showBases = visibleRange <= 120 / context.scaleFactor;
+    const showArrows = visibleRange <= 3000 / context.scaleFactor;
 
     // Show bases only when zoomed in and only if in view
     const bases = showBases
@@ -743,6 +758,7 @@ class GeneViewerVisualization {
      * @param setSelection A callback function to set the currently selected probes and probeset.
      * @param parallelProbesets The maximum number of probesets to display in parallel.
      * @param scaleFactor The scale factor for the visualization.
+     * @param regionMap A mapping of region types to their display properties (color and label).
      */
     constructor(
         el: HTMLElement,
@@ -751,14 +767,15 @@ class GeneViewerVisualization {
         selection: ProbeSelection,
         setSelection: (selection: ProbeSelection) => void,
         parallelProbesets: number,
-        scaleFactor: number
+        scaleFactor: number,
+        regionMap: RegionMap
     ) {
         this.gene = gene;
         this.visibleProbesetIds = visibleProbesets;
         this.selection = selection;
         this.setSelection = setSelection;
         this.parallelProbesets = Math.min(parallelProbesets, Object.keys(gene.probes).length);
-        this.context = createContext(el, gene, this.parallelProbesets, scaleFactor);
+        this.context = createContext(el, gene, this.parallelProbesets, scaleFactor, regionMap);
 
         this._init();
     }
@@ -912,10 +929,10 @@ class GeneViewerVisualization {
             .attr("y", (_, i) => PADDING_TOP + i * PROBE_HEIGHT + PROBE_HEIGHT / 2)
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", 8)
+            .attr("font-size", 10)
             .attr("cursor", "pointer")
             .attr("fill", (d) => (this.selection.probesetId === d ? "orange" : "var(--text-color)"))
-            .text((d) => d.slice(0, 10) + (d.length > 10 ? "..." : "")) // truncate long names
+            .text((d) => d.slice(0, 8) + (d.length > 8 ? "..." : "")) // truncate long names
             .attr("title", (d) => d) // show full name on hover
             .on("click", (event, d) => {
                 event.stopPropagation(); // prevent click from propagating to svg and deselecting probe

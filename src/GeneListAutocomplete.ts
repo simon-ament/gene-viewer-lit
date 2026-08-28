@@ -9,24 +9,25 @@ export class GeneListAutocomplete extends LitElement {
         .autocomplete-wrapper {
             position: relative;
             display: inline-block;
-            width: 100%;
+            width: 25ch;
         }
 
         .autocomplete-input {
-            padding: 0.5rem;
+            padding: var(--input-padding, 0.5rem);
             box-sizing: border-box;
             background-color: var(--background-color);
             border: 1px solid var(--border-color);
-            border-radius: 0.3rem;
+            border-radius: 0.5em;
             color: inherit;
             width: 100%;
+            font-size: var(--input-font-size, 1rem);
         }
 
         .autocomplete-list {
             position: absolute;
             background-color: var(--background-color);
             border: 1px solid var(--border-color);
-            border-radius: 0.3rem;
+            border-radius: 0.5em;
             max-height: 15rem;
             overflow-y: auto;
             padding: 0;
@@ -35,15 +36,16 @@ export class GeneListAutocomplete extends LitElement {
             width: 100%;
         }
         .autocomplete-item {
+            font-size: 1.4em;
             cursor: pointer;
             list-style-type: none;
-            padding: 0.5rem 1.5rem;
+            padding: var(--input-padding, 0.5rem);
         }
         .autocomplete-item:not(.disabled):hover {
-            background-color: #f0f0f0;
+            background-color: color(from contrast-color(var(--background-color)) srgb r g b / 0.05);
         }
         .autocomplete-item.highlighted {
-            background-color: #e0e0e0;
+            background-color: color(from contrast-color(var(--background-color)) srgb r g b / 0.1);
         }
         .autocomplete-item.disabled {
             opacity: 0.5;
