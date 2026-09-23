@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <style>
     body {
-      background: #fafafa;
       font-family: "Satoshi", system-ui, sans-serif;
-    }
-    gene-viewer {
-      --gene-viewer-background-color: #fafafa;
     }
 
     /* gene-viewer-custom {
@@ -23,7 +19,7 @@
   <div id="demo">
       <gene-viewer-custom parallelProbesets="3" scaleFactor="1"></gene-viewer-custom>
       <div style="height: 20rem;"></div>
-      <gene-viewer viewerServer="http://localhost:5000/api/visualization" parallelProbesets="0" viewerId="homo_sapiens"></gene-viewer>
+      <gene-viewer viewerServer="http://localhost:5000/visualization" viewerId="human3"></gene-viewer>
   </div>
 
   <script type="module">
