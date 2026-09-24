@@ -1,5 +1,6 @@
-import { GeneViewer, GeneViewerCustom } from './GeneViewer.js';
+import { GeneViewer } from './GeneViewer.js';
 import { GeneListAutocomplete } from './GeneListAutocomplete.js';
+import { GeneViewerCustom } from './GeneViewerCustom.js';
 
 if (!customElements.get('gene-viewer')) {
   customElements.define('gene-viewer', GeneViewer);

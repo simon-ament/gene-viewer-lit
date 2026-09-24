@@ -342,26 +342,24 @@ export class GeneViewerBase extends LitElement {
             index => html`
               <select
                 @change=${(e: Event) => {
-                            const selectElement = e.target as HTMLSelectElement;
-                            const selectedId = selectElement.value;
-                            const newVisibleProbesets = [
-                              ...this._visibleProbesetIds,
-                            ];
-                            newVisibleProbesets[index] = selectedId;
-                            this.showProbesets(newVisibleProbesets);
-                          }}
+                  const selectElement = e.target as HTMLSelectElement;
+                  const selectedId = selectElement.value;
+                  const newVisibleProbesets = [...this._visibleProbesetIds];
+                  newVisibleProbesets[index] = selectedId;
+                  this.showProbesets(newVisibleProbesets);
+                }}
               >
                 ${map(
-                            probesetIds,
-                            probesetId => html`
-                              <option
-                                .selected=${probesetId === this._visibleProbesetIds[index]}
-                                value=${probesetId}
-                              >
-                                ${probesetId}
-                              </option>
-                            `,
-                          )}
+                  probesetIds,
+                  probesetId => html`
+                    <option
+                      .selected=${probesetId === this._visibleProbesetIds[index]}
+                      value=${probesetId}
+                    >
+                      ${probesetId}
+                    </option>
+                  `,
+                )}
               </select>
             `,
           )}

@@ -3,7 +3,7 @@
   "description": "A lightweight and embeddable per-gene visualization of genomic regions, probes, and custom tracks.",
   "license": "MIT",
   "author": "gene-viewer",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",

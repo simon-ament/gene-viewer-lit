@@ -1,5 +1,5 @@
 export { GeneViewer } from './GeneViewer.js';
-export { GeneViewerCustom } from './GeneViewer.js';
+export { GeneViewerCustom } from './GeneViewerCustom.js';
 export { GeneListAutocomplete } from './GeneListAutocomplete.js';
 export type {
   Probe,

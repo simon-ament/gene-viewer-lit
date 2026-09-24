@@ -224,11 +224,11 @@ export class GeneListAutocomplete extends LitElement {
                 class="autocomplete-item ${this._highlightedIndex === this._filteredGeneList.indexOf(geneId) ? 'highlighted' : ''}"
                 @click="${() => this._onGeneSelect(geneId)}"
                 @keydown="${(event: KeyboardEvent) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                              event.preventDefault();
-                              this._onGeneSelect(geneId);
-                            }
-                          }}"
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    this._onGeneSelect(geneId);
+                  }
+                }}"
                 role="option"
                 aria-selected="${this._highlightedIndex === this._filteredGeneList.indexOf(geneId)}"
                 tabindex="0"
