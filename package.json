@@ -4,6 +4,10 @@
   "license": "MIT",
   "author": "gene-viewer",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/simon-ament/gene-viewer-lit"
+  },
   "type": "module",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
