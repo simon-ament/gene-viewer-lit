@@ -3,7 +3,7 @@
   "description": "A lightweight and embeddable per-gene visualization of genomic regions, probes, and custom tracks.",
   "license": "MIT",
   "author": "gene-viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/simon-ament/gene-viewer-lit"
@@ -28,7 +28,8 @@
   },
   "dependencies": {
     "d3": "^7.9.0",
-    "lit": "^3.1.4"
+    "lit": "^3.1.4",
+    "tslib": "^2.6.3"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.10.3",
@@ -39,14 +40,13 @@
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
     "@web/dev-server": "^0.4.6",
-    "@web/test-runner": "^0.18.2",
+    "@web/test-runner": "^1.0.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.7",
     "prettier": "^3.3.2",
-    "tslib": "^2.6.3",
     "typescript": "^5.5.3"
   },
   "customElements": "custom-elements.json",
