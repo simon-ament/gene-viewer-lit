@@ -335,7 +335,7 @@ export class GeneViewerBase extends LitElement {
 
     return html`
       <div class="controls-col">
-        <h3>Select Probsets</h3>
+        <h3>Select Probe Sets</h3>
         <div class="probeset-selectors">
           ${map(
             range,
