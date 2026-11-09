@@ -1,4 +1,4 @@
-# \<gene-viewer>
+# \<gene-viewer/>
 
 This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) recommendation.
 
@@ -12,7 +12,7 @@ npm i gene-viewer
 
 ```html
 <script type="module">
-  import 'gene-viewer/gene-viewer.js';
+  import 'gene-viewer';
 </script>
 
 <gene-viewer></gene-viewer>

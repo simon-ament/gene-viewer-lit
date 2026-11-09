@@ -13,13 +13,15 @@
   "module": "dist/src/index.js",
   "exports": {
     ".": "./dist/src/index.js",
-    "./gene-viewer.js": "./dist/src/gene-viewer.js"
+    "./gene-viewer.js": "./dist/src/gene-viewer.js",
+    "./bundle": "./dist/gene-viewer.bundle.js"
   },
   "scripts": {
     "analyze": "cem analyze --litelement",
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"web-dev-server\"",
-    "build": "tsc && npm run analyze -- --exclude dist",
-    "prepublish": "tsc && npm run analyze -- --exclude dist",
+    "build": "tsc && npm run bundle && npm run analyze -- --exclude dist",
+    "bundle": "esbuild dist/src/gene-viewer.js --bundle --format=esm --minify --target=es2021 --legal-comments=eof --outfile=dist/gene-viewer.bundle.js",
+    "prepublish": "tsc && npm run bundle && npm run analyze -- --exclude dist",
     "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
     "prepare": "husky",
@@ -28,8 +30,7 @@
   },
   "dependencies": {
     "d3": "^7.9.0",
-    "lit": "^3.1.4",
-    "tslib": "^2.6.3"
+    "lit": "^3.1.4"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.10.3",
@@ -42,6 +43,7 @@
     "@web/dev-server": "^0.4.6",
     "@web/test-runner": "^1.0.0",
     "concurrently": "^8.2.2",
+    "esbuild": "^0.25.12",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "husky": "^9.0.11",

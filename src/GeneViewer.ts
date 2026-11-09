@@ -1,10 +1,9 @@
 import { html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { Gene, GeneViewerReadyEventDetail } from './visualization/types.js';
 import './GeneListAutocomplete.js';
 import { GeneViewerBase } from './GeneViewerBase.js';
 
-@customElement('gene-viewer')
 export class GeneViewer extends GeneViewerBase {
   /* Properties */
 
@@ -171,6 +170,10 @@ export class GeneViewer extends GeneViewerBase {
 
     return super.render();
   }
+}
+
+if (!customElements.get('gene-viewer')) {
+  customElements.define('gene-viewer', GeneViewer);
 }
 
 declare global {

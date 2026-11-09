@@ -1,7 +1,6 @@
 import { html, css, LitElement } from 'lit';
-import { customElement, property, state, query } from 'lit/decorators.js';
+import { property, state, query } from 'lit/decorators.js';
 
-@customElement('gene-list-autocomplete')
 export class GeneListAutocomplete extends LitElement {
   /* Styles */
 
@@ -241,6 +240,10 @@ export class GeneListAutocomplete extends LitElement {
       </div>
     `;
   }
+}
+
+if (!customElements.get('gene-list-autocomplete')) {
+  customElements.define('gene-list-autocomplete', GeneListAutocomplete);
 }
 
 declare global {

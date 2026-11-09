@@ -297,6 +297,7 @@ const setupElements = (context: VisualizationContext, gene: Gene) => {
         const yPos =
           event instanceof MouseEvent ? event.pageY : event.detail.pageY;
         context.tooltip
+          /* TODO: incorrect in Jupyter */
           .style('left', xPos > window.innerWidth / 2 ? '' : `${xPos + 20}px`)
           .style(
             'right',

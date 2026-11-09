@@ -1,15 +1,6 @@
-import { GeneViewer } from './GeneViewer.js';
-import { GeneListAutocomplete } from './GeneListAutocomplete.js';
-import { GeneViewerCustom } from './GeneViewerCustom.js';
-
-if (!customElements.get('gene-viewer')) {
-  customElements.define('gene-viewer', GeneViewer);
-}
-
-if (!customElements.get('gene-viewer-custom')) {
-  customElements.define('gene-viewer-custom', GeneViewerCustom);
-}
-
-if (!customElements.get('gene-list-autocomplete')) {
-  customElements.define('gene-list-autocomplete', GeneListAutocomplete);
-}
+// Registers all gene-viewer custom elements. Each module guards its own
+// `customElements.define` call, so importing this module more than once
+// (e.g. from separate bundles) does not throw.
+import './GeneViewer.js';
+import './GeneViewerCustom.js';
+import './GeneListAutocomplete.js';
